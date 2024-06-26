@@ -1,13 +1,28 @@
 import flet as ft 
 from flet import*
+from utils.int_button import Stepper
+import os
+import json
 
 
     
     
 def main(page:ft.Page):
-    page.window_width=400
-    page.window_height=730
+    page.window.width=400
+    page.window.height=730
+    page.adaptive=True
+    theme=ft.Theme()
+    theme.page_transitions.windows=ft.PageTransitionTheme.NONE
+    theme.page_transitions.android=ft.PageTransitionTheme.NONE
+    page.theme=theme
+    page.theme_mode=ft.ThemeMode.SYSTEM
+    page.window.always_on_top=True
     page.update()   
+
+    def event(e):
+        if e.data == "detach" and page.platform == ft.PagePlatform.ANDROID:
+            os._exit(1)
+    page.on_app_lifecycle_state_change = event
     
 
     user_log = ft.TextField(
@@ -27,30 +42,42 @@ def main(page:ft.Page):
 
     box_group = ft.RadioGroup(
         content=ft.Column(
-            [
-                ft.Radio(label="VT", value="VT"),
-                ft.Radio(label="UT", value="UT"),
-                ft.Radio(label="X", value="X"),
+            spacing=5,
+            controls=[
+                ft.Radio(label="VT", value="VT", label_style=ft.TextStyle(color="black"),),
+                ft.Radio(label="UT", value="UT", label_style=ft.TextStyle(color="black"),),
+                ft.Radio(label="X", value="X,", label_style=ft.TextStyle(color="black"),),
             ]
         )
     )
+   
 
-    box_1 = ft.Checkbox(
-        label="inspector 1 name"
-    )
-    box_2 = ft.Checkbox(
-        label="inspector 2 name"
+    inspectors = [
+        {"id": 1, "name": "abdul"},
+        {"id": 2, "name": "sam"},
+        {"id": 3, "name": "nana"},
+        {"id": 4, "name": "zahra"},
+        {"id": 5, "name": "ahra"},
+    ]
+
+    in_name = []       
+
+    for inspector in inspectors:
+        in_name.append(
+            ft.Checkbox(
+                label=inspector["name"],
+                label_style=ft.TextStyle(color="black"),
+            )
         )
-    box_3 = ft.Checkbox(
-        label="inspector 3 name"
-        )
-    box_4 = ft.Checkbox(
-        label="inspector 4 name"
-        )
+        
+        
+
     
     client_name = ft.Dropdown(
+        bgcolor="white",
         border_radius=10,
         width=320,
+        color="black",
         options=[
             ft.dropdown.Option("Client name 1"),
             ft.dropdown.Option("Client name 2"),
@@ -60,7 +87,10 @@ def main(page:ft.Page):
     )
 
     plant_location = ft.Dropdown(
+        bgcolor="white",
+        text_style=ft.TextStyle(color="black"),
         border_radius=10,
+        color="black",
         width=320,
         options=[
             ft.dropdown.Option("Location/address 1"),
@@ -70,83 +100,92 @@ def main(page:ft.Page):
         ]
     )
 
+    def click(e):
+        print(f"you click{job.value}")
+
+
     contact = ft.TextField(
         width=320,
         border_radius=10,
         label="contact",
+        color="black",
+        border_color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_width=1
+        
     )
 
 
     txt_1 = ft.TextField(
         width=320,
         border_radius=10,
-        label="Discription"
+        label="Discription",
+        color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_color="black",
+        border_width=1
 
     ) 
 
     txt_2 = ft.TextField(
         width=320,
         border_radius=10,
-        label="material"
+        label="material",
+        color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_color="black",
+        border_width=1
         
     ) 
 
     txt_3 = ft.TextField(
         width=320,
         border_radius=10,
-        label="Heat"
+        label="Heat",
+        color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_color="black",
+        border_width=1
         
     )
 
     accept_val=ft.TextField(
         width=320,
         border_radius=10,
-        label="Acceptance"
+        label="Acceptance",
+        color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_color="black",
+        border_width=1
         
     )
 
     nde_val=ft.TextField(
         width=320,
         border_radius=10,
-        label="NDE"
+        label="NDE",
+        color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_color="black",
+        border_width=1
     )
 
     surface_val=ft.TextField(
         width=320,
         border_radius=10,
-        label="Surface"
+        label="Surface",
+        color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_color="black",
+        border_width=1
     )
 
 
-    job = ft.TextField(
-        text_align="center",
-        value="0",
-        width=320,
-        height=60,
-        prefix=ft.IconButton(ft.icons.ARROW_UPWARD),
-        suffix=ft.IconButton(ft.icons.ARROW_DOWNWARD),
-        border_radius=10
-    )
-
-    od_val = ft.TextField(
-        text_align="center",
-        value="0",
-        width=320,
-        height=60,
-        prefix=ft.IconButton(ft.icons.ARROW_UPWARD),
-        suffix=ft.IconButton(ft.icons.ARROW_DOWNWARD),
-        border_radius=10
-    )
-
-    id_val = ft.TextField(
-        text_align="center",
-        value="0",
-        width=320,
-        height=60,
-        prefix=ft.IconButton(ft.icons.ARROW_UPWARD),
-        suffix=ft.IconButton(ft.icons.ARROW_DOWNWARD),
-        border_radius=10
-    )
+    job = Stepper()
+    od_val = Stepper()
+    id_val = Stepper()
+    thick_val = Stepper()
+    height_val = Stepper()
 
 
     def route_chnage(route):
@@ -154,6 +193,7 @@ def main(page:ft.Page):
         page.views.append(
             ft.View(
                 "/",
+                bgcolor=ft.colors.BLUE_50,
                 controls=[
                     ft.Container(
                         width=400,
@@ -181,7 +221,7 @@ def main(page:ft.Page):
                                                 height=50,
                                                 bgcolor=ft.colors.PURPLE,
                                                 color="white",
-                                                on_click=lambda _:page.go("/main")
+                                                on_click=lambda _:page.go("/main_screen")
                                             )
                                         ],
                                       
@@ -194,7 +234,7 @@ def main(page:ft.Page):
             )
         ),
 
-        if page.route == "/main":
+        if page.route == "/main_screen":
             page.views.append(
                 ft.View(
                     "/main",
@@ -215,15 +255,15 @@ def main(page:ft.Page):
                             controls=[
                                 ft.Container(
                                     width=400,
-                                    height=190,
+                                    height=195,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                            ft.Text("tipo de preuba", size=20, weight="bold"),
+                                            ft.Text("tipo de preuba", size=20, weight="bold", color="black"),
                                             ft.Container(
-                                                padding=10,
+                                                padding=ft.padding.only(top=10),
                                                 content=ft.Column(
                                                     controls=[
                                                         box_group
@@ -235,22 +275,19 @@ def main(page:ft.Page):
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=225,
+                                    height=229,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                            ft.Text("inspector", size=20, weight="bold"),
+                                            ft.Text("inspector", size=20, weight="bold", color="black"),
                                             ft.Container(
-                                            padding=10,
+                                            padding=ft.padding.only(top=10),
                                             content=ft.Column(
-                                                controls=[
-                                                    box_1,
-                                                    box_2,
-                                                    box_3,
-                                                    box_4,
-                                                    ]
+                                                spacing=5,
+                                                controls=in_name # here, the problem, in?name is a list, so remove this, look
+                                                    
                                                 ) 
                                             ),
                                         ]
@@ -264,7 +301,7 @@ def main(page:ft.Page):
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                            ft.Text("Client Name", size=20, weight="bold"),
+                                            ft.Text("Client Name", size=20, weight="bold", color="black"),
                                             client_name,
                                         ]
                                     )
@@ -277,7 +314,7 @@ def main(page:ft.Page):
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                            ft.Text("Planta/plant", size=20),
+                                            ft.Text("Planta/plant", size=20, color="black"),
                                             plant_location,
                                         ]
                                     )
@@ -290,27 +327,27 @@ def main(page:ft.Page):
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                           ft.Text("Contact name", size=20),
+                                           ft.Text("Contact name", size=20, color="black"),
                                             contact,
                                         ]
                                     )
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=500,
+                                    height=510,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                            ft.Text("Part Information", size=30, weight="bold"),
-                                            ft.Text("Part description", size=20),
+                                            ft.Text("Part Information", size=30, weight="bold", color="black"),
+                                            ft.Text("Part description", size=20, color="black"),
                                             txt_1,
-                                            ft.Text("Material specs", size=20),
+                                            ft.Text("Material specs", size=20, color="black"),
                                             txt_2,
-                                            ft.Text("Heat", size=20),
+                                            ft.Text("Heat", size=20, color="black"),
                                             txt_3,
-                                            ft.Text("Job qty", size=20),
+                                            ft.Text("Job qty", size=20, color="black"),
                                             ft.Container(
                                             content=job
                                             ),
@@ -319,18 +356,20 @@ def main(page:ft.Page):
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=530,
+                                    height=550,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
+                                        spacing=6,
                                         horizontal_alignment="center",
                                         controls=[
-                                            ft.Text("Part information", size=30, weight="bold"),
+                                            ft.Text("Part information", size=30, weight="bold", color="black"),
+                                            ft.Text("Dimensions", size=25),
                                             ft.Container(
                                             content=ft.Column(
                                                 horizontal_alignment="center",
                                                 controls=[
-                                                    ft.Text("OD:", size=25),
+                                                    ft.Text("OD:", size=25, color="black"),
                                                     od_val
                                                 ]
                                             )
@@ -339,7 +378,7 @@ def main(page:ft.Page):
                                             content=ft.Column(
                                                 horizontal_alignment="center",
                                                 controls=[
-                                                    ft.Text("ID:", size=25),
+                                                    ft.Text("ID:", size=25, color="black"),
                                                     id_val
                                                 ]
                                             )
@@ -348,8 +387,8 @@ def main(page:ft.Page):
                                             content=ft.Column(
                                                 horizontal_alignment="center",
                                                 controls=[
-                                                    ft.Text("Thickness:", size=25),
-                                                    id_val
+                                                    ft.Text("Thickness:", size=25, color="black"),
+                                                    thick_val
                                                 ]
                                             )
                                         ),
@@ -357,8 +396,8 @@ def main(page:ft.Page):
                                             content=ft.Column(
                                                 horizontal_alignment="center",
                                                 controls=[
-                                                    ft.Text("Height:", size=25),
-                                                    id_val
+                                                    ft.Text("Height:", size=25, color="black"),
+                                                    height_val
                                                 ]
                                             )
                                         ),
@@ -367,39 +406,39 @@ def main(page:ft.Page):
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=110,
+                                    height=120,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                           ft.Text("NDE Specifications", size=20, weight="bold"),
+                                           ft.Text("NDE Specifications", size=20, weight="bold", color="black"),
                                             nde_val,
                                         ]
                                     )
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=110,
+                                    height=120,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                           ft.Text("Acceptance criteria", size=20, weight="bold"),
+                                           ft.Text("Acceptance criteria", size=20, weight="bold", color="black"),
                                             accept_val,
                                         ]
                                     )
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=115,
+                                    height=120,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                           ft.Text("Surface roughness", size=20, weight="bold"),
+                                           ft.Text("Surface roughness", size=20, weight="bold", color="black"),
                                             surface_val,
                                         ]
                                     )
@@ -412,11 +451,12 @@ def main(page:ft.Page):
                                         horizontal_alignment="center",
                                         controls=[
                                             ft.ElevatedButton(
-                                                "print",
-                                                width=200,
+                                                content=ft.Text("Hacer Reporte",size=18),
+                                                width=210,
                                                 height=60,
                                                 color="white",
-                                                bgcolor=ft.colors.PURPLE
+                                                bgcolor=ft.colors.PURPLE,
+                                                on_click= click
                                             )
                                         ]
                                     )
@@ -441,5 +481,4 @@ def main(page:ft.Page):
     page.go(page.route)
 
 
-if __name__ == "__main__":
-    ft.app(target=main)
+ft.app(target=main)
