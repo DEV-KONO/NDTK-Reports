@@ -2,11 +2,11 @@ import flet as ft
 
 
 def incr_btn(e, text):
-    text.value = str(float(text.value) + 1.0)
+    text.value = str(round(float(text.value) + 0.1, 2))
     e.page.update()
 
 def decr_btn(e, text):
-    text.value = str(float(text.value) - 1.0)
+    text.value = str(round(float(text.value) - 0.1, 2))
     e.page.update()
 
 def Stepper():
@@ -23,6 +23,6 @@ def Stepper():
         show_cursor=False,
         color="black",
         input_filter=ft.NumbersOnlyInputFilter()
-)
+    )
     return text
 

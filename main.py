@@ -1,13 +1,17 @@
 import flet as ft 
 from flet import*
 from utils.int_button import Stepper
+from dotenv import load_dotenv
 import os
 import json
+import requests
 
-
-    
+load_dotenv()    
     
 def main(page:ft.Page):
+    api_url = os.getenv('api_url')
+    test = ""
+
     page.window.width=400
     page.window.height=730
     page.adaptive=True
@@ -18,6 +22,11 @@ def main(page:ft.Page):
     page.theme_mode=ft.ThemeMode.SYSTEM
     page.window.always_on_top=True
     page.update()   
+
+    def test_grabber(e):
+        global test
+        test =  e.control.value
+        page.update()
 
     def event(e):
         if e.data == "detach" and page.platform == ft.PagePlatform.ANDROID:
@@ -46,19 +55,25 @@ def main(page:ft.Page):
             controls=[
                 ft.Radio(label="VT", value="VT", label_style=ft.TextStyle(color="black"),),
                 ft.Radio(label="UT", value="UT", label_style=ft.TextStyle(color="black"),),
-                ft.Radio(label="X", value="X,", label_style=ft.TextStyle(color="black"),),
+                ft.Radio(label="PT", value="PT", label_style=ft.TextStyle(color="black"),),
+                ft.Radio(label="ET", value="ET", label_style=ft.TextStyle(color="black"),),
+                ft.Radio(label="MT", value="MT", label_style=ft.TextStyle(color="black"),),
             ]
-        )
+        ),
+        on_change=test_grabber
     )
    
+    response = requests.get(f"{api_url}all_inspectors")
 
-    inspectors = [
-        {"id": 1, "name": "abdul"},
-        {"id": 2, "name": "sam"},
-        {"id": 3, "name": "nana"},
-        {"id": 4, "name": "zahra"},
-        {"id": 5, "name": "ahra"},
-    ]
+    inspectors = json.loads(json.dumps(response.json()))
+    
+    # [
+    #     {"id": 1, "name": "abdul"},
+    #     {"id": 2, "name": "sam"},
+    #     {"id": 3, "name": "nana"},
+    #     {"id": 4, "name": "zahra"},
+    #     {"id": 5, "name": "ahra"},
+    # ]
 
     in_name = []       
 
@@ -101,6 +116,7 @@ def main(page:ft.Page):
     )
 
     def click(e):
+
         print(f"you click{job.value}")
 
 
