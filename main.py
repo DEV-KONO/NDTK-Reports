@@ -1,6 +1,6 @@
 import flet as ft 
 from flet import*
-from utils.int_button import Stepper
+from utils.int_button import Stepper, Stepper_qty
 from dotenv import load_dotenv
 import os
 import json
@@ -11,6 +11,8 @@ load_dotenv()
 def main(page:ft.Page):
     api_url = os.getenv('api_url')
     test = ""
+    inspectors_list = []
+    names_width = 0
 
     page.window.width=400
     page.window.height=730
@@ -27,6 +29,11 @@ def main(page:ft.Page):
         global test
         test =  e.control.value
         page.update()
+        print(f"Test:{test}")
+
+    def ins_grabber(e):
+        global inspectors_list
+        inspectors_list = e.vale
 
     def event(e):
         if e.data == "detach" and page.platform == ft.PagePlatform.ANDROID:
@@ -78,42 +85,57 @@ def main(page:ft.Page):
     in_name = []       
 
     for inspector in inspectors:
+        names_width += 75
         in_name.append(
             ft.Checkbox(
                 label=inspector["name"],
                 label_style=ft.TextStyle(color="black"),
+                on_change=ins_grabber
             )
         )
         
         
 
     
-    client_name = ft.Dropdown(
-        bgcolor="white",
+    client_name = ft.TextField(
+        label="Nombre de cliente", 
         border_radius=10,
-        width=320,
-        color="black",
-        options=[
-            ft.dropdown.Option("Client name 1"),
-            ft.dropdown.Option("Client name 2"),
-            ft.dropdown.Option("Client name 3"),
-            ft.dropdown.Option("others")
-        ]
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
     )
+    
+    # ft.Dropdown(
+    #     bgcolor="white",
+    #     border_radius=10,
+    #     width=320,
+    #     color="black",
+    #     options=[
+    #         ft.dropdown.Option("Client name 1"),
+    #         ft.dropdown.Option("Client name 2"),
+    #         ft.dropdown.Option("Client name 3"),
+    #         ft.dropdown.Option("others")
+    #     ]
+    # )
 
-    plant_location = ft.Dropdown(
-        bgcolor="white",
-        text_style=ft.TextStyle(color="black"),
+    plant_location = ft.TextField(
+        label="Plant Location", 
         border_radius=10,
-        color="black",
-        width=320,
-        options=[
-            ft.dropdown.Option("Location/address 1"),
-            ft.dropdown.Option("Location/address 2"),
-            ft.dropdown.Option("Loaction/address 3"),
-            ft.dropdown.Option("others")
-        ]
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
     )
+    # ft.Dropdown(
+    #     bgcolor="white",
+    #     text_style=ft.TextStyle(color="black"),
+    #     border_radius=10,
+    #     color="black",
+    #     width=320,
+    #     options=[
+    #         ft.dropdown.Option("Location/address 1"),
+    #         ft.dropdown.Option("Location/address 2"),
+    #         ft.dropdown.Option("Loaction/address 3"),
+    #         ft.dropdown.Option("others")
+    #     ]
+    # )
 
     def click(e):
 
@@ -135,7 +157,7 @@ def main(page:ft.Page):
     txt_1 = ft.TextField(
         width=320,
         border_radius=10,
-        label="Discription",
+        label="Description",
         color="black",
         label_style=ft.TextStyle(color="black"),
         border_color="black",
@@ -197,7 +219,7 @@ def main(page:ft.Page):
     )
 
 
-    job = Stepper()
+    job = Stepper_qty()
     od_val = Stepper()
     id_val = Stepper()
     thick_val = Stepper()
@@ -271,7 +293,7 @@ def main(page:ft.Page):
                             controls=[
                                 ft.Container(
                                     width=400,
-                                    height=195,
+                                    height=300,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
@@ -291,7 +313,7 @@ def main(page:ft.Page):
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=229,
+                                    height=names_width + 50,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
