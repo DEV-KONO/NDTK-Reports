@@ -7,11 +7,14 @@ import json
 import requests
 
 load_dotenv()    
-    
+
+test = ""
+inspectors_list = []
+client_name_var = ""
+plant_loc = ""
+
 def main(page:ft.Page):
     api_url = os.getenv('api_url')
-    test = ""
-    inspectors_list = []
     names_width = 0
 
     page.window.width=400
@@ -33,7 +36,30 @@ def main(page:ft.Page):
 
     def ins_grabber(e):
         global inspectors_list
-        inspectors_list = e.vale
+
+        if e.control.value:
+            inspectors_list.append(e.control.label)
+        else:
+            inspectors_list.remove(e.control.label)
+        page.update()
+        print(inspectors_list)
+
+    # def Text_Grabber(e, var):
+    #     var = e.control.value
+    #     page.update()
+    #     print(var)
+
+    # def cn_grabber(e):
+    #     global client_name_var
+    #     client_name_var = e.control.value
+    #     page.update()
+    #     print(client_name_var)
+    
+    # def pl_grabber(e):
+    #     global plant_loc
+    #     plant_loc = e.control.value
+    #     page.update()
+    #     print(plant_loc)
 
     def event(e):
         if e.data == "detach" and page.platform == ft.PagePlatform.ANDROID:
@@ -101,7 +127,8 @@ def main(page:ft.Page):
         label="Nombre de cliente", 
         border_radius=10,
         keyboard_type=ft.KeyboardType.TEXT,
-        width=320
+        width=320,
+        on_change=lambda _:Text_Grabber(var=client_name_var)
     )
     
     # ft.Dropdown(
@@ -121,7 +148,8 @@ def main(page:ft.Page):
         label="Plant Location", 
         border_radius=10,
         keyboard_type=ft.KeyboardType.TEXT,
-        width=320
+        width=320,
+        on_change=lambda _:Text_Grabber(var=plant_loc)
     )
     # ft.Dropdown(
     #     bgcolor="white",
