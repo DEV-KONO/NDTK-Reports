@@ -1,13 +1,19 @@
 import flet as ft 
 from flet import*
-from utils.int_button import Stepper
+from utils.int_button import Stepper, Stepper_qty
+from dotenv import load_dotenv
 import os
 import json
+import requests
 
-
-    
+load_dotenv()    
     
 def main(page:ft.Page):
+    api_url = os.getenv('api_url')
+    test = ""
+    inspectors_list = []
+    names_width = 0
+
     page.window.width=400
     page.window.height=730
     page.adaptive=True
@@ -15,9 +21,19 @@ def main(page:ft.Page):
     theme.page_transitions.windows=ft.PageTransitionTheme.NONE
     theme.page_transitions.android=ft.PageTransitionTheme.NONE
     page.theme=theme
-    page.theme_mode=ft.ThemeMode.SYSTEM
+    page.theme_mode=ft.ThemeMode.LIGHT
     page.window.always_on_top=True
     page.update()   
+
+    def test_grabber(e):
+        global test
+        test =  e.control.value
+        page.update()
+        print(f"Test:{test}")
+
+    def ins_grabber(e):
+        global inspectors_list
+        inspectors_list = e.vale
 
     def event(e):
         if e.data == "detach" and page.platform == ft.PagePlatform.ANDROID:
@@ -46,12 +62,18 @@ def main(page:ft.Page):
             controls=[
                 ft.Radio(label="VT", value="VT", label_style=ft.TextStyle(color="black"),),
                 ft.Radio(label="UT", value="UT", label_style=ft.TextStyle(color="black"),),
-                ft.Radio(label="X", value="X,", label_style=ft.TextStyle(color="black"),),
+                ft.Radio(label="PT", value="PT", label_style=ft.TextStyle(color="black"),),
+                ft.Radio(label="ET", value="ET", label_style=ft.TextStyle(color="black"),),
+                ft.Radio(label="MT", value="MT", label_style=ft.TextStyle(color="black"),),
             ]
-        )
+        ),
+        on_change=test_grabber
     )
    
+    #response = requests.get(f"{api_url}all_inspectors")
 
+    #inspectors = json.loads(json.dumps(response.json()))
+    
     inspectors = [
         {"id": 1, "name": "abdul"},
         {"id": 2, "name": "sam"},
@@ -63,44 +85,61 @@ def main(page:ft.Page):
     in_name = []       
 
     for inspector in inspectors:
+        names_width += 75
         in_name.append(
             ft.Checkbox(
                 label=inspector["name"],
                 label_style=ft.TextStyle(color="black"),
+                on_change=ins_grabber
             )
         )
         
         
 
     
-    client_name = ft.Dropdown(
-        bgcolor="white",
+    client_name = ft.TextField(
+        label="Nombre de cliente", 
         border_radius=10,
-        width=320,
-        color="black",
-        options=[
-            ft.dropdown.Option("Client name 1"),
-            ft.dropdown.Option("Client name 2"),
-            ft.dropdown.Option("Client name 3"),
-            ft.dropdown.Option("others")
-        ]
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
     )
+    
+    # ft.Dropdown(
+    #     bgcolor="white",
+    #     border_radius=10,
+    #     width=320,
+    #     color="black",
+    #     options=[
+    #         ft.dropdown.Option("Client name 1"),
+    #         ft.dropdown.Option("Client name 2"),
+    #         ft.dropdown.Option("Client name 3"),
+    #         ft.dropdown.Option("others")
+    #     ]
+    # )
 
-    plant_location = ft.Dropdown(
-        bgcolor="white",
-        text_style=ft.TextStyle(color="black"),
+    plant_location = ft.TextField(
+        label="Plant Location", 
         border_radius=10,
-        color="black",
+        keyboard_type=ft.KeyboardType.TEXT,
         width=320,
-        options=[
-            ft.dropdown.Option("Location/address 1"),
-            ft.dropdown.Option("Location/address 2"),
-            ft.dropdown.Option("Loaction/address 3"),
-            ft.dropdown.Option("others")
-        ]
+        color="black"
     )
+    # ft.Dropdown(
+    #     bgcolor="white",
+    #     text_style=ft.TextStyle(color="black"),
+    #     border_radius=10,
+    #     color="black",
+    #     width=320,
+    #     options=[
+    #         ft.dropdown.Option("Location/address 1"),
+    #         ft.dropdown.Option("Location/address 2"),
+    #         ft.dropdown.Option("Loaction/address 3"),
+    #         ft.dropdown.Option("others")
+    #     ]
+    # )
 
     def click(e):
+
         print(f"you click{job.value}")
 
 
@@ -119,7 +158,7 @@ def main(page:ft.Page):
     txt_1 = ft.TextField(
         width=320,
         border_radius=10,
-        label="Discription",
+        label="Description",
         color="black",
         label_style=ft.TextStyle(color="black"),
         border_color="black",
@@ -180,8 +219,103 @@ def main(page:ft.Page):
         border_width=1
     )
 
+    serial_num1 = ft.TextField(
+        label="Serial number", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
 
-    job = Stepper()
+    serial_num2 = ft.TextField(
+        label="serila number", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+
+    distance = ft.TextField(
+        label="Distance", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    sensitivity = ft.TextField(
+        label="sensitivity", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    notch = ft.TextField(
+        label="notch", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    record = ft.TextField(
+        label="recording", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    axial_x = ft.TextField(
+        label="axial scanning", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    circumferental_x = ft.TextField(
+        label="circumferental", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    inspection = ft.TextField(
+        label="inspection method", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    coupling = ft.TextField(
+        label="coupling agent", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    inspector_s = ft.TextField(
+        label="Inspection stage", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    sn = ft.TextField(
+        label="s/n", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320
+    )
+
+    textarea = ft.TextField(
+        width=300,
+        height=350,
+        multiline=True,
+        min_lines=6,
+        max_lines=6,
+        border_radius=10
+    )
+    
+
+
+    job = Stepper_qty()
     od_val = Stepper()
     id_val = Stepper()
     thick_val = Stepper()
@@ -255,7 +389,7 @@ def main(page:ft.Page):
                             controls=[
                                 ft.Container(
                                     width=400,
-                                    height=195,
+                                    height=300,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
@@ -275,7 +409,7 @@ def main(page:ft.Page):
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=229,
+                                    height=names_width + 50,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
@@ -440,6 +574,109 @@ def main(page:ft.Page):
                                         controls=[
                                            ft.Text("Surface roughness", size=20, weight="bold", color="black"),
                                             surface_val,
+                                        ]
+                                    )
+                                ),
+                                ft.Container(
+                                    width=400,
+                                    height=165,
+                                    padding=ft.padding.only(top=10),
+                                    bgcolor=ft.colors.WHITE,
+                                    content=ft.Column(
+                                        horizontal_alignment="center",
+                                        controls=[
+                                            ft.Text("UT Instrument", size=25, weight="bold", color="black"),
+                                            ft.Text("Serial Number", size=20, ),
+                                            serial_num1, #thiss
+                                        ]
+                                    )
+                                ),
+                                ft.Container(
+                                    width=400,
+                                    height=165,
+                                    padding=ft.padding.only(top=10),
+                                    bgcolor=ft.colors.WHITE,
+                                    content=ft.Column(
+                                        horizontal_alignment="center",
+                                        controls=[
+                                            ft.Text("Test calibration setup", text_align="center", size=25, weight="bold", color="black"),
+                                            ft.Text("Serial Number", size=20),
+                                            serial_num2, 
+                                        ]
+                                    )
+                                ),
+                                ft.Container(
+                                    width=400,
+                                    height=490,
+                                    padding=ft.padding.only(top=10),
+                                    bgcolor=ft.colors.WHITE,
+                                    content=ft.Column(
+                                        horizontal_alignment="center",
+                                        controls=[
+                                            ft.Text("Calibration blocks", text_align="center", size=25, weight="bold", color="black"),
+                                            ft.Text("Distance calibration angle verification", size=20, text_align="center"),
+                                            distance,
+                                            ft.Text("Sensitivity Block", size=20),
+                                            sensitivity,
+                                            ft.Text("Notch Depth", size=20),
+                                            notch,
+                                            ft.Text("Recording Level", size=20),
+                                            record, 
+                                        ]
+                                    )
+                                ),
+                                ft.Container(
+                                    width=400,
+                                    height=270,
+                                    padding=ft.padding.only(top=10),
+                                    bgcolor=ft.colors.WHITE,
+                                    content=ft.Column(
+                                        horizontal_alignment="center",
+                                        controls=[
+                                            ft.Text("Scanning Direction", text_align="center", size=25, weight="bold", color="black"),
+                                            ft.Text("Axial scanning", size=20, text_align="center"),
+                                            axial_x,
+                                            ft.Text("Circumferential/ Axial Scanning", size=20),
+                                            circumferental_x,
+                                        ]
+                                    )
+                                ),
+                                ft.Container(
+                                    width=400,
+                                    height=370,
+                                    padding=ft.padding.only(top=10),
+                                    bgcolor=ft.colors.WHITE,
+                                    content=ft.Column(
+                                        horizontal_alignment="center",
+                                        controls=[
+                                            ft.Text("Inspection Information", text_align="center", size=25, weight="bold", color="black"),
+                                            ft.Text("Inspection Method", size=20, text_align="center"),
+                                            inspection,
+                                            ft.Text("coupling agent", size=20, text_align="center"),
+                                            coupling,
+                                            ft.Text("Inspection Stage", size=20),
+                                            inspector_s,
+                                        ]
+                                    )
+                                ),
+                                ft.Container(
+                                    width=400,
+                                    height=460,
+                                    padding=ft.padding.only(top=10),
+                                    bgcolor=ft.colors.WHITE,
+                                    content=ft.Column(
+                                        horizontal_alignment="center",
+                                        alignment="center",
+                                        controls=[
+                                            ft.Text("Inspection Results", text_align="center", size=25, weight="bold", color="black"),
+                                            ft.Text("SN", size=20),
+                                            sn,
+                                            ft.Container(
+                                                padding=10,
+                                                content=ft.CupertinoCheckbox(label="Accept?"),
+                                            ),
+                                            ft.Text("Remarks", size=20),
+                                            textarea,
                                         ]
                                     )
                                 ),
