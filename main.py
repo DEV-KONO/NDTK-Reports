@@ -66,14 +66,10 @@ def main(page:ft.Page):
                 ft.Radio(label="ET", value="ET", label_style=ft.TextStyle(color="black"),),
                 ft.Radio(label="MT", value="MT", label_style=ft.TextStyle(color="black"),),
             ]
-        ),
-        on_change=test_grabber
+        )
     )
    
-    #response = requests.get(f"{api_url}all_inspectors")
 
-    #inspectors = json.loads(json.dumps(response.json()))
-    
     inspectors = [
         {"id": 1, "name": "abdul"},
         {"id": 2, "name": "sam"},
@@ -120,23 +116,15 @@ def main(page:ft.Page):
     plant_location = ft.TextField(
         label="Plant Location", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
+        color="black",
         width=320,
-        color="black"
+        options=[
+            ft.dropdown.Option("Location/address 1"),
+            ft.dropdown.Option("Location/address 2"),
+            ft.dropdown.Option("Loaction/address 3"),
+            ft.dropdown.Option("others")
+        ]
     )
-    # ft.Dropdown(
-    #     bgcolor="white",
-    #     text_style=ft.TextStyle(color="black"),
-    #     border_radius=10,
-    #     color="black",
-    #     width=320,
-    #     options=[
-    #         ft.dropdown.Option("Location/address 1"),
-    #         ft.dropdown.Option("Location/address 2"),
-    #         ft.dropdown.Option("Loaction/address 3"),
-    #         ft.dropdown.Option("others")
-    #     ]
-    # )
 
     def click(e):
 
