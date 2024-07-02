@@ -5,13 +5,15 @@ from dotenv import load_dotenv
 import os
 import json
 import requests
+import datetime
 
 load_dotenv()    
 
-test = ""
 inspectors_list = []
-client_name_var = ""
-plant_loc = ""
+year = datetime.datetime.now().year
+#test = ""
+#client_name_var = ""
+#plant_loc = ""
 
 def main(page:ft.Page):
     api_url = os.getenv('api_url')
@@ -28,11 +30,11 @@ def main(page:ft.Page):
     page.window.always_on_top=True
     page.update()   
 
-    def test_grabber(e):
-        global test
-        test =  e.control.value
-        page.update()
-        print(f"Test:{test}")
+    # def test_grabber(e):
+    #     global test
+    #     test =  e.control.value
+    #     page.update()
+    #     print(f"Test:{test}")
 
     def ins_grabber(e):
         global inspectors_list
@@ -93,7 +95,7 @@ def main(page:ft.Page):
                 ft.Radio(label="MT", value="MT", label_style=ft.TextStyle(color="black"),),
             ]
         ),
-        on_change=test_grabber
+        #on_change=test_grabber
     )
    
     response = requests.get(f"{api_url}all_inspectors")
@@ -128,7 +130,7 @@ def main(page:ft.Page):
         border_radius=10,
         keyboard_type=ft.KeyboardType.TEXT,
         width=320,
-        on_change=lambda _:Text_Grabber(var=client_name_var)
+        #on_change=lambda _:Text_Grabber(var=client_name_var)
     )
     
     # ft.Dropdown(
@@ -149,7 +151,7 @@ def main(page:ft.Page):
         border_radius=10,
         keyboard_type=ft.KeyboardType.TEXT,
         width=320,
-        on_change=lambda _:Text_Grabber(var=plant_loc)
+        #on_change=lambda _:Text_Grabber(var=plant_loc)
     )
     # ft.Dropdown(
     #     bgcolor="white",
@@ -166,8 +168,10 @@ def main(page:ft.Page):
     # )
 
     def click(e):
-
+        print(box_group.value, inspectors_list)
         print(f"you click{job.value}")
+        #hacer una función para que se guarde el reporte en la base de datos y se haga un numero de reporte
+        f"{api_url}?test={box_group.value}&report_num={box_group.value}-R-{year}-234&client_name=Liebher&plant=garcia&contact_name=luis%20Gerardo&part_desc=descpartegenerica&material=acero&heat=colada%20generica&j_order=orden%20de%20trabajo&j_qty=2&od=23.5&id=24.5&width=22.9&height=33.5&NDE=normal%20spec&crit_accept=criterio%20base&rough=machined%20condition&uti_sn=289703&sn1=232739&sn2=223399&d_cal=cal%20distance&sens_block=astm%20flat&notch=test%20notch&rec_lvl=test%20rec%20lvl&ax_scanning=test%20ax%20scanning&circ_ax_scanning=circ%20ax&method=test%20method&coupling=test%20coupling&stage=test%20stage&remarks=test%20remark%20large%20data&&insp_name=Samuel%kono%peralta&cert_lvl=NDT%20Nivel%202&ndt_act=realizo%20y%20evaluo&cert_due=20%20mar%202025&rej_sn=223344"
 
 
     contact = ft.TextField(
