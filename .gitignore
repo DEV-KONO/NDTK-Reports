@@ -5,3 +5,4 @@ images
 template_filler.py
 .env
 models.py
+static

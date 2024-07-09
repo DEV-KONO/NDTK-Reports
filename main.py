@@ -2,15 +2,22 @@ import flet as ft
 from flet import*
 from utils.int_button import Stepper, Stepper_qty
 from dotenv import load_dotenv
+from pathlib import Path
+from playwright.async_api import async_playwright
 import os
 import json
 import requests
 import datetime
+import pdfkit
+import asyncio
 
 load_dotenv()    
 
-inspectors_list = []
 year = datetime.datetime.now().year
+downloads_path = str(Path.home() / "Downloads")
+
+
+inspectors_list = []
 #test = ""
 #client_name_var = ""
 #plant_loc = ""
@@ -18,6 +25,8 @@ year = datetime.datetime.now().year
 def main(page:ft.Page):
     api_url = os.getenv('api_url')
     names_width = 0
+
+    test_sn_height = 165
 
     page.window.width=400
     page.window.height=730
@@ -96,15 +105,16 @@ def main(page:ft.Page):
             ]
         )
     )
-   
 
-    inspectors = [
-        {"id": 1, "name": "abdul"},
-        {"id": 2, "name": "sam"},
-        {"id": 3, "name": "nana"},
-        {"id": 4, "name": "zahra"},
-        {"id": 5, "name": "ahra"},
-    ]
+    response = requests.get(f"{api_url}all_inspectors")
+
+    inspectors = json.loads(json.dumps(response.json()))
+
+    # {"id": 1, "name": "abdul"},
+    # {"id": 2, "name": "sam"},
+    # {"id": 3, "name": "nana"},
+    # {"id": 4, "name": "zahra"},
+    # {"id": 5, "name": "ahra"},
 
     in_name = []       
 
@@ -143,24 +153,64 @@ def main(page:ft.Page):
     # )
 
     plant_location = ft.TextField(
-        label="Plant Location", 
+        label="Ubicación de la Planta", 
         border_radius=10,
-        color="black",
+        keyboard_type=ft.KeyboardType.TEXT,
         width=320,
-        options=[
-            ft.dropdown.Option("Location/address 1"),
-            ft.dropdown.Option("Location/address 2"),
-            ft.dropdown.Option("Loaction/address 3"),
-            ft.dropdown.Option("others")
-        ]
+        #on_change=lambda _:Text_Grabber(var=client_name_var)
     )
+    
+    # ft.Dropdown(
+    #     label="Plant Location", 
+    #     border_radius=10,
+    #     color="black",
+    #     width=320,
+    #     options=[
+    #         ft.dropdown.Option("Location/address 1"),
+    #         ft.dropdown.Option("Location/address 2"),
+    #         ft.dropdown.Option("Loaction/address 3"),
+    #         ft.dropdown.Option("others")
+    #     ]
+    # )
 
-    def click(e):
+    async def click(e):
         print(box_group.value, inspectors_list)
         print(f"you click{job.value}")
         #hacer una función para que se guarde el reporte en la base de datos y se haga un numero de reporte
-        f"{api_url}?test={box_group.value}&report_num={box_group.value}-R-{year}-234&client_name=Liebher&plant=garcia&contact_name=luis%20Gerardo&part_desc=descpartegenerica&material=acero&heat=colada%20generica&j_order=orden%20de%20trabajo&j_qty=2&od=23.5&id=24.5&width=22.9&height=33.5&NDE=normal%20spec&crit_accept=criterio%20base&rough=machined%20condition&uti_sn=289703&sn1=232739&sn2=223399&d_cal=cal%20distance&sens_block=astm%20flat&notch=test%20notch&rec_lvl=test%20rec%20lvl&ax_scanning=test%20ax%20scanning&circ_ax_scanning=circ%20ax&method=test%20method&coupling=test%20coupling&stage=test%20stage&remarks=test%20remark%20large%20data&&insp_name=Samuel%kono%peralta&cert_lvl=NDT%20Nivel%202&ndt_act=realizo%20y%20evaluo&cert_due=20%20mar%202025&rej_sn=223344"
+        url = f"{api_url}?test={box_group.value}&report_num={box_group.value}-R-{year}-234&client_name={client_name.value}&plant={plant_location.value}&contact_name={contact.value}&part_desc={Description.value}&material={material.value}&heat={heat.value}&j_order={job_order.value}&j_qty={job.value}&od={od_val.value}&id={id_val.value}&width={thick_val.value}&height={height_val.value}&NDE={nde_val.value}&crit_accept={accept_val.value}&rough={surface_val.value}&uti_sn={uti_sn.value}&sn1={test_sn.value}&d_cal={distance.value}&sens_block={sensitivity.value}&notch={notch.value}&rec_lvl={record.value}&ax_scanning={axial_x.value}&circ_ax_scanning={circumferental_x.value}&method={inspection.value}&coupling={coupling.value}&stage={inspector_s.value}&remarks={textarea.value}&insp_name={inspectors_list[0]}&ndt_act={ndt_act.value}"
+        print(url)
+        if check.value:
+            url = url + f"&acc_sn={sn.value}"
+        else:
+            url = url + f"&rej_sn={sn.value}"
 
+        pdfurldownload = str(downloads_path) + "\\" + str(box_group.value) + "-R-" + str(year) + ".pdf"
+
+        async with async_playwright() as p:
+            browser = await p.chromium.launch()
+            page = await browser.new_page()
+            await page.goto(url)
+            await page.pdf(path=pdfurldownload)
+            await browser.close()
+        
+        #print(pdfurldownload)
+        
+        #pdfkit.from_url(url, pdfurldownload, configuration=config)
+        # response = response.get(url)
+
+    ndt_act = ft.TextField(
+        width=320,
+        border_radius=10,
+        label="NDT Activities",
+        color="black",
+        border_color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_width=1
+    )
+
+    check = ft.CupertinoCheckbox(
+        label="Accept?"
+    )
 
     contact = ft.TextField(
         width=320,
@@ -174,7 +224,7 @@ def main(page:ft.Page):
     )
 
 
-    txt_1 = ft.TextField(
+    Description = ft.TextField(
         width=320,
         border_radius=10,
         label="Description",
@@ -185,7 +235,7 @@ def main(page:ft.Page):
 
     ) 
 
-    txt_2 = ft.TextField(
+    material = ft.TextField(
         width=320,
         border_radius=10,
         label="material",
@@ -196,10 +246,21 @@ def main(page:ft.Page):
         
     ) 
 
-    txt_3 = ft.TextField(
+    heat = ft.TextField(
         width=320,
         border_radius=10,
         label="Heat",
+        color="black",
+        label_style=ft.TextStyle(color="black"),
+        border_color="black",
+        border_width=1
+        
+    )
+
+    job_order = ft.TextField(
+        width=320,
+        border_radius=10,
+        label="Job Order",
         color="black",
         label_style=ft.TextStyle(color="black"),
         border_color="black",
@@ -238,20 +299,12 @@ def main(page:ft.Page):
         border_width=1
     )
 
-    serial_num1 = ft.TextField(
-        label="Serial number", 
+    uti_sn = ft.TextField(
+        label="UT Instrument Serial Number", 
         border_radius=10,
         keyboard_type=ft.KeyboardType.TEXT,
         width=320
     )
-
-    serial_num2 = ft.TextField(
-        label="serila number", 
-        border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
-        width=320
-    )
-
 
     distance = ft.TextField(
         label="Distance", 
@@ -330,6 +383,98 @@ def main(page:ft.Page):
         min_lines=6,
         max_lines=6,
         border_radius=10
+    )
+
+    test_sn1 = ft.TextField(
+        label="Test Serial Number 1", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320,
+    )
+
+    test_sn2 = ft.TextField(
+        label="Test Serial Number 2", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320,
+        visible=False
+    )
+
+    test_sn3 = ft.TextField(
+        label="Test Serial Number 3", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320,
+        visible=False
+    )
+
+    test_sn4 = ft.TextField(
+        label="Test Serial Number 4", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320,
+        visible=False
+    )
+
+    test_sn5 = ft.TextField(
+        label="Test Serial Number 5", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        width=320,
+        visible=False
+    )
+
+    textarea_counter = 1
+
+    def add_textarea(e, textarea_counter, test_sn_height):
+        if textarea_counter > 0 and textarea_counter < 6:
+            textarea_counter += 1
+            if textarea_counter == 2:
+                test_sn2.visible == True
+            elif textarea_counter == 3:
+                test_sn3.visible == True
+            elif textarea_counter == 4:
+                test_sn4.visible == True
+            elif textarea_counter == 5:
+                test_sn5.visible == True
+
+            test_sn_height += 200
+
+            e.page.update()
+        elif textarea_counter > 5:
+            textarea_counter -= 1
+        else:
+            print("error")
+
+    def del_textarea(e, textarea_counter, test_sn_height):
+        if textarea_counter > 0 and textarea_counter < 6:
+            if textarea_counter == 2:
+                test_sn2.visible == False
+            elif textarea_counter == 3:
+                test_sn3.visible == False
+            elif textarea_counter == 4:
+                test_sn4.visible == False
+            elif textarea_counter == 5:
+                test_sn5.visible == False
+            textarea_counter -= 1
+
+            test_sn_height -= 200
+
+            e.page.update()
+        elif textarea_counter < 1:
+            textarea_counter += 1
+        else:
+            print("error")
+
+
+    add_btn = ft.IconButton(
+        icon= ft.icons.ADD,
+        on_click=lambda _:add_textarea(e, textarea_counter, test_sn_height)
+    )
+    
+    del_btn = ft.IconButton(
+        icon= ft.icons.REMOVE_ROUNDED,
+        on_click=lambda _:del_textarea(e, textarea_counter, test_sn_height)
     )
     
 
@@ -480,14 +625,14 @@ def main(page:ft.Page):
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                           ft.Text("Contact name", size=20, color="black"),
+                                            ft.Text("Contact name", size=20, color="black"),
                                             contact,
                                         ]
                                     )
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=510,
+                                    height=600,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
@@ -495,11 +640,13 @@ def main(page:ft.Page):
                                         controls=[
                                             ft.Text("Part Information", size=30, weight="bold", color="black"),
                                             ft.Text("Part description", size=20, color="black"),
-                                            txt_1,
+                                            Description,
                                             ft.Text("Material specs", size=20, color="black"),
-                                            txt_2,
+                                            material,
                                             ft.Text("Heat", size=20, color="black"),
-                                            txt_3,
+                                            heat,
+                                            ft.Text("Job Order", size=20, color="black"),
+                                            job_order,
                                             ft.Text("Job qty", size=20, color="black"),
                                             ft.Container(
                                             content=job
@@ -606,7 +753,25 @@ def main(page:ft.Page):
                                         controls=[
                                             ft.Text("UT Instrument", size=25, weight="bold", color="black"),
                                             ft.Text("Serial Number", size=20, ),
-                                            serial_num1, #thiss
+                                            uti_sn, #thiss
+                                        ]
+                                    )
+                                ),
+                                ft.Container(
+                                    width=400,
+                                    height=test_sn_height,
+                                    padding=ft.padding.only(top=10),
+                                    bgcolor=ft.colors.WHITE,
+                                    content=ft.Column(
+                                        horizontal_alignment="center",
+                                        controls=[
+                                            ft.Text("Test calibration setup", text_align="center", size=25, weight="bold", color="black"),
+                                            ft.Text("Serial Number", size=20),
+                                            test_sn1,
+                                            test_sn2,
+                                            test_sn3,
+                                            test_sn4,
+                                            test_sn5 
                                         ]
                                     )
                                 ),
@@ -618,9 +783,8 @@ def main(page:ft.Page):
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
-                                            ft.Text("Test calibration setup", text_align="center", size=25, weight="bold", color="black"),
-                                            ft.Text("Serial Number", size=20),
-                                            serial_num2, 
+                                            del_btn,
+                                            add_btn
                                         ]
                                     )
                                 ),
@@ -680,7 +844,7 @@ def main(page:ft.Page):
                                 ),
                                 ft.Container(
                                     width=400,
-                                    height=460,
+                                    height=750,
                                     padding=ft.padding.only(top=10),
                                     bgcolor=ft.colors.WHITE,
                                     content=ft.Column(
@@ -692,10 +856,12 @@ def main(page:ft.Page):
                                             sn,
                                             ft.Container(
                                                 padding=10,
-                                                content=ft.CupertinoCheckbox(label="Accept?"),
+                                                content=check,
                                             ),
                                             ft.Text("Remarks", size=20),
                                             textarea,
+                                            ft.Text("NDT Activities", size=20),
+                                            ndt_act
                                         ]
                                     )
                                 ),
