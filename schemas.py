@@ -1,7 +1,5 @@
 from datetime import date
-from httpx import stream
 from pydantic import BaseModel
-from typing import Optional
 
 class Schema_ClientBase(BaseModel):
     name: str
@@ -18,22 +16,45 @@ class Schema_Acceptance(BaseModel):
 
 class Schema_NDE(BaseModel):
     nde_spec: str
-    client_name: str
     acceptance: Schema_Acceptance | None = None
 
 class Schema_Acabado(BaseModel):
     acabado: str
-    client_name: str
 
 
 class Schema_Client(Schema_ClientBase):
 
     plantas: Schema_Plants | None = None
     contactos: Schema_Contacts | None = None
-    nde: Schema_NDE | None = None
 
     class config:
         orm_mode = True
+
+class Schema_User(BaseModel):
+    email: str
+    password: str
+
+class Schema_Register(BaseModel):
+    email: str
+    user: str 
+    password: str
+    confpassword: str
+
+class Schema_Email(BaseModel):
+    email: str
+
+class Schema_Inspector(BaseModel):
+    name: str
+    vt: str | None=None
+    vt_due: str | None=None
+    pt: str | None=None
+    pt_due: str | None=None
+    ut: str | None=None
+    ut_due: str | None=None
+    et: str | None=None
+    et_due: str | None=None
+    mt: str | None=None
+    mt_due: str | None=None
 
 class Schema_UTI(BaseModel):
     sn: int
@@ -41,6 +62,14 @@ class Schema_UTI(BaseModel):
     model: str
     calibration_date: date
     calibration_due_date: date
+
+class Schema_Probe(BaseModel):
+    sn :int
+    brand :str
+    model :str
+    freq :str
+    size :str
+    angle :str
 
 # class Schema_Acceptance(BaseModel):
 #     id: int
@@ -51,22 +80,22 @@ class Schema_Just_UTI_SN(BaseModel):
 
 class Schema_Report(BaseModel):
 
-    test: str 
-    client_name: str 
-    plant: str 
-    contact_name: str 
+    test: str | None=None 
+    client_name: str  | None=None
+    plant: str | None=None 
+    contact_name: str  | None=None
     part_desc: str 
     material: str 
-    heat: str 
-    j_order: str 
+    heat: str | None=None 
+    j_order: str  | None=None
     j_qty: str 
     od: float 
     id: float 
     width: float 
     height: float 
     NDE: str 
-    crit_accept: str 
-    rough: str
+    crit_accept: str | None=None 
+    rough: str | None=None
     uti_sn: int
     sn1: int
     d_cal: str
@@ -80,7 +109,7 @@ class Schema_Report(BaseModel):
     stage: str
     remarks: str
     insp_name: str
-    ndt_act: str
+    ndt_act: str | None=None
     cert_lvl: str | None = None
     cert_due: str| None = None
     acc_sn: int | None = None

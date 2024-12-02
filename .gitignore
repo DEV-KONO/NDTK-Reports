@@ -6,3 +6,4 @@ template_filler.py
 .env
 models.py
 static
+.api.env

@@ -1,9 +1,9 @@
-import flet as ft 
-from flet import*
-from utils.int_button import Stepper, Stepper_qty
 from dotenv import load_dotenv
+from flet import*
 from pathlib import Path
 from playwright.async_api import async_playwright
+from admin_App import admin_page
+import flet as ft 
 import os
 import json
 import requests
@@ -11,21 +11,23 @@ import datetime
 import pdfkit
 import asyncio
 
-load_dotenv()    
+from models import Agent
+from template_filler import login
 
 year = datetime.datetime.now().year
 downloads_path = str(Path.home() / "Downloads")
 
 
-inspectors_list = []
 #test = ""
 client_name_var = ""
 plant_name_var = ""
 contact_name_var = ""
 #plant_loc = ""
 
+load_dotenv(".api.env")
+
 def main(page:ft.Page):
-    api_url = os.getenv('api_url')
+    api_url = os.getenv("api_url")
 
     names_width = 0
 
@@ -47,16 +49,17 @@ def main(page:ft.Page):
     #     test =  e.control.value
     #     page.update()
     #     print(f"Test:{test}")
+    inspectors_list = []
 
-    def ins_grabber(e):
-        global inspectors_list
+    # def ins_grabber(e):
+    #     nonlocal inspectors_list
 
-        if e.control.value:
-            inspectors_list.append(e.control.label)
-        else:
-            inspectors_list.remove(e.control.label)
-        page.update()
-        print(inspectors_list)
+    #     if e.control.value:
+    #         inspectors_list.append(e.control.label)
+    #     else:
+    #         inspectors_list.remove(e.control.label)
+    #     page.update()
+    #     # print(inspectors_list)
 
     # def Text_Grabber(e, var):
     #     var = e.control.value
@@ -109,9 +112,6 @@ def main(page:ft.Page):
         )
     )
 
-    response = requests.get(f"{api_url}all_inspectors")
-
-    inspectors = json.loads(json.dumps(response.json()))
 
     # {"id": 1, "name": "abdul"},
     # {"id": 2, "name": "sam"},
@@ -120,18 +120,21 @@ def main(page:ft.Page):
     # {"id": 5, "name": "ahra"},
 
     def nde_option_maker():
-        client_data = { "name" : client_name.value }
-        nde_json = requests.get(f"{api_url}all_client_nde", json=client_data)
+        nde_json = requests.get(f"{api_url}all_nde")
 
-        nde_list = json.loads(json.dumps(nde_json.json()))
+        nde_list = nde_json.json()
 
         nde_list_parsed = []
 
         for nde in nde_list:
             if client_name.value != "Otro":
                 try:
-                    nde_list_parsed.append(str(nde["nde_spec"]))
+                    if nde["nde_spec"]:
+                        nde_list_parsed.append(str(nde["nde_spec"]))
+                    else:
+                        nde_list_parsed.append("No NDE Assigned Yet!!!!")
                 except TypeError:
+                    print("Type Error!!")
                     print("No NDE Specification grabbed from DB")
     
         #plants_list_parsed.append("Otro")
@@ -148,10 +151,9 @@ def main(page:ft.Page):
         page.update()
 
     def acabado_option_maker():
-        client_data = { "name" : client_name.value }
-        acabado_json = requests.get(f"{api_url}all_client_acabados", json=client_data)
+        acabado_json = requests.get(f"{api_url}all_acabados")
 
-        acabado_list = json.loads(json.dumps(acabado_json.json()))
+        acabado_list = acabado_json.json()
 
         acabado_list_parsed = []
 
@@ -160,6 +162,7 @@ def main(page:ft.Page):
                 try:
                     acabado_list_parsed.append(str(acab["acabado"]))
                 except TypeError:
+                    print("Type Error!!")
                     print("No NDE Specification grabbed from DB")
     
         #plants_list_parsed.append("Otro")
@@ -176,20 +179,27 @@ def main(page:ft.Page):
         page.update()
 
     def acc_crit_option_maker():
-        data = { "client_name" : client_name.value,
-                        "nde_spec" : nde_val.value }
+        data = { "nde_spec" : nde_val.value }
         crit_json = requests.get(f"{api_url}all_nde_criteria", json=data)
 
-        crit_list = json.loads(json.dumps(crit_json.json()))
+        crit_list = crit_json.json()
+
+        # print(crit_list)
+        # print(type(crit_list) == dict)
 
         crit_list_parsed = []
-
-        for criteria in crit_list:
-            if client_name.value != "Otro":
-                try:
-                    crit_list_parsed.append(str(criteria["acceptance_criteria"]))
-                except TypeError:
-                    print("No criteria grabbed from DB")
+        if type(crit_list) == list:
+            for criteria in crit_list:
+                if client_name.value != "Otro":
+                    try:
+                        if criteria["acceptance_criteria"]:
+                            crit_list_parsed.append(str(criteria["acceptance_criteria"]))
+                        else:
+                            crit_list_parsed.append("No Acceptance Criteria Yet!!!!")
+                    except TypeError:
+                        crit_list_parsed.append("No criteria yet")
+                        print("Type Error!!")
+                        print("No criteria grabbed from DB")
     
         #plants_list_parsed.append("Otro")
 
@@ -204,20 +214,42 @@ def main(page:ft.Page):
 
         page.update()
 
-    in_name = []       
 
-    for inspector in inspectors:
-        names_width += 75
-        in_name.append(
-            ft.Checkbox(
-                label=inspector["name"],
-                label_style=ft.TextStyle(color="black"),
-                on_change=ins_grabber
+    def reload_inspectors():
+
+        in_name = []       
+
+        response = requests.get(f"{api_url}all_inspectors")
+
+        inspectors = response.json()
+
+        nonlocal names_width
+        names_width = 0
+
+        def ins_adder(e):
+            if e.control.value:
+                inspectors_list.append(str(e.control.label))
+                print(inspectors_list)
+            else:
+                inspectors_list.pop()
+                print(inspectors_list)
+
+        for inspector in inspectors:
+            names_width += 50
+            in_name.append(
+                ft.Checkbox(
+                    label=inspector["name"],
+                    label_style=ft.TextStyle(color="black"),
+                    on_change=ins_adder
+                    #on_change=ins_grabber
+                )
             )
-        )
+        return in_name
+    
+    # in_name = reload_inspectors
 
     clients_json = requests.get(f"{api_url}all_clients")
-    clients_list = json.loads(json.dumps(clients_json.json()))
+    clients_list = clients_json.json()
 
     clients_list_parsed = []
 
@@ -236,14 +268,24 @@ def main(page:ft.Page):
 
     def reload_clients():
         clients_json = requests.get(f"{api_url}all_clients")
-        clients_list = json.loads(json.dumps(clients_json.json()))
+
+        print("clients_json: ", clients_json)
+
+        clients_list = clients_json.json()
+
+        print("clients_list:", clients_list)
 
         clients_list_parsed = []
 
+        print("clients_list_parsed: ", clients_list_parsed)
+
         for client in clients_list:
             clients_list_parsed.append(str(client["name"]))
+            print("Appended client name: ", client["name"])
 
         clients_list_parsed.append("Otro")
+
+        print("Clients_list_parsed: ", clients_list_parsed)
 
         client_name.options = list(map(ft.dropdown.Option, clients_list_parsed))
 
@@ -253,7 +295,7 @@ def main(page:ft.Page):
         plants_json = requests.get(f"{api_url}all_client_plants/", json=client_data)
         nonlocal plants_list
         plants_list = {}
-        plants_list = json.loads(json.dumps(plants_json.json()))
+        plants_list = plants_json.json()
 
         nonlocal plants_list_parsed
         plants_list_parsed = []
@@ -263,6 +305,7 @@ def main(page:ft.Page):
                 try:
                     plants_list_parsed.append(str(plant["name"]))
                 except TypeError:
+                    print("Type Error!!")
                     print("No plant name grabbed from DB")
     
         plants_list_parsed.append("Otro")
@@ -277,7 +320,7 @@ def main(page:ft.Page):
         contacts_json = requests.get(f"{api_url}all_client_contacts/", json=client_data)
         nonlocal contacts_list
         contacts_list = {}
-        contacts_list = json.loads(json.dumps(contacts_json.json()))
+        contacts_list = contacts_json.json()
 
         nonlocal contacts_list_parsed
         contacts_list_parsed = []
@@ -287,6 +330,7 @@ def main(page:ft.Page):
                 try:
                     contacts_list_parsed.append(str(contact["name"]))
                 except TypeError:
+                    print("Type Error!!")
                     print("No contact name grabbed from DB")
     
         contacts_list_parsed.append("Otro")
@@ -307,7 +351,7 @@ def main(page:ft.Page):
             plant_name.visible = False
             contact_name.visible = False
             send_all_btn.visible = True
-            e.page.update()
+            page.update() #changed from e.page.update() to page.update 
         else:
             other_client_name.visible = False
             other_plant_name.visible = False
@@ -316,7 +360,7 @@ def main(page:ft.Page):
             contact_name.visible = True
             send_all_btn.visible = False
 
-            e.page.update()
+            page.update() #changed from e.page.update() to page.update
 
         client_data = {
             "name" : client_name.value
@@ -337,6 +381,12 @@ def main(page:ft.Page):
         nde_option_maker()
         acc_crit_option_maker()
         acabado_option_maker()
+        distance_list_maker()
+        sensitivity_list_maker()
+        notch_list_maker()
+        record_list_maker()
+        scanning_list_maker()
+        inspection_info_list_maker()
 
         e.page.update()
     
@@ -361,7 +411,8 @@ def main(page:ft.Page):
     #TODO añadir un boton para cada "OTRO" para que pueda agregar plantas y contactos a la base de datos
 
     def plant_change(e):
-        print(e.control.value)
+        # print(e.control.value)
+        e.page.update()
         if e.control.value == "Otro":
             other_plant_name.visible = True
             other_plant_button.visible = True
@@ -374,8 +425,8 @@ def main(page:ft.Page):
     def send_plant(e):
         if other_plant_name.value and client_name.value:
 
-            print(other_plant_name.value)
-            print(client_name.value)
+            # print(other_plant_name.value)
+            # print(client_name.value)
             
             warning_text.visible = False
 
@@ -411,8 +462,8 @@ def main(page:ft.Page):
     def send_contact(e):
         if other_contact_name.value and client_name.value:
 
-            print(other_contact_name.value)
-            print(client_name.value)
+            # print(other_contact_name.value)
+            # print(client_name.value)
             
             warning_text.visible = False
 
@@ -474,11 +525,11 @@ def main(page:ft.Page):
     )
     
     def contact_change(e):
-        print(e.control.value)
+        # print(e.control.value)
         if e.control.value == "Otro":
             other_contact_name.visible = True
             other_contact_button.visible = True
-            e.page.update()
+            page.update()
         else:
             other_contact_name.visible = False
             other_contact_button.visible = False
@@ -558,7 +609,7 @@ def main(page:ft.Page):
     def send_all(e):
         # print(other_client_name.value + other_contact_name.value + other_plant_name.value)
         if other_client_name.value and other_contact_name.value and other_plant_name.value:
-            print("text")
+            # print("text")
             warning_text.visible = False
             client_data = {
                 "name" : other_client_name.value
@@ -607,13 +658,13 @@ def main(page:ft.Page):
         for y in x:
             try:
                 z = int(y)
-                print(z)
+                # print(z)
                 if type(z) is int:
                     return z
                 else:
                     print("not int")
             except ValueError:
-                print("Cant be converted into Int")
+                print(f"{y} Cant be converted into Int")
 
     async def click(e):
     #     print(box_group.value, inspectors_list)
@@ -642,15 +693,15 @@ def main(page:ft.Page):
             "rough":f"{acabado.value}, (≤{surface_val.value} {measure.value})",
             "uti_sn":int(uti_sn.value.split()[1]),
             "sn1": if_int(test_sn1.value.split()),
-            "d_cal":distance.value,
-            "sens_block":sensitivity.value,
-            "notch":notch.value,
-            "rec_lvl":record.value,
+            "d_cal":distance_dropdown.value,
+            "sens_block":sensitivity_dropdown.value,
+            "notch":notch_dropdown.value,
+            "rec_lvl":record_dropdown.value,
             "ax_scanning":axial_x.value,
-            "circ_ax_scanning":circumferental_x.value,
-            "method":inspection.value,
-            "coupling":coupling.value,
-            "stage":inspector_s.value,
+            "circ_ax_scanning":circumferential_x.value,
+            "method":ins_method_dropdown.value,
+            "coupling":agent_dropdown.value,
+            "stage":stage_dropdown.value,
             "remarks":textarea.value,
             "insp_name":inspectors_list[0],
             "ndt_act":ndt_act.value
@@ -663,27 +714,39 @@ def main(page:ft.Page):
 
         if test_sn2.value  != '':
             try:
-                data["sn2"] = int(test_sn2.value)
+                data["sn2"] = if_int(test_sn2.value.split())
             except TypeError:
+                print("Type Error!!")
                 pass
+            except AttributeError:
+                print("No Value")
 
-        elif test_sn3.value != '':
+        if test_sn3.value != '':
             try:
-                data["sn3"] = int(test_sn3.value)
+                data["sn3"] = if_int(test_sn3.value.split())
             except TypeError:
+                print("Type Error!!")
                 pass
+            except AttributeError:
+                print("No Value")
 
-        elif test_sn4.value != '':
+        if test_sn4.value != '':
             try:
-                data["sn4"] = int(test_sn4.value)
+                data["sn4"] = if_int(test_sn4.value.split())
             except TypeError:
+                print("Type Error!!")
                 pass
+            except AttributeError:
+                print("No Value")
 
-        elif test_sn5.value != '':
+        if test_sn5.value != '':
             try:
-                data["sn5"] = int(test_sn5.value)
+                data["sn5"] = if_int(test_sn5.value.split())
             except TypeError:
+                print("Type Error!!")
                 pass
+            except AttributeError:
+                print("No Value")
 
         pdfurldownload = str(downloads_path) + "\\" + str(box_group.value) + "-R-" + str(year) + ".pdf"
 
@@ -702,10 +765,19 @@ def main(page:ft.Page):
         #pdfkit.from_url(url, pdfurldownload, configuration=config)
         # response = response.get(url)
 
+    def change_area(e):
+        if check.value:
+            textarea.value = "No Recordable Indications Found"
+            page.update()
+        else:
+            textarea.value = "Rejectable Indications Were Found"
+            page.update()
+
     ndt_act = ft.TextField(
         width=320,
         border_radius=10,
         label="NDT Activities",
+        value="Perform and Evaluate",
         color="black",
         border_color="black",
         label_style=ft.TextStyle(color="black"),
@@ -713,7 +785,9 @@ def main(page:ft.Page):
     )
 
     check = ft.CupertinoCheckbox(
-        label="Accept?"
+        label="Accept?",
+        value=True,
+        on_change=change_area
     )
 
     # contact = ft.TextField(
@@ -828,11 +902,12 @@ def main(page:ft.Page):
         border_color="black",
         border_width=1,
         text_size=15,
+        value="rms"
     )
 
     def uti_list_maker():
         uti_json = requests.get(f"{api_url}all_uti")
-        uti_list = json.loads(json.dumps(uti_json.json()))
+        uti_list = uti_json.json()
 
         uti_list_parsed = []
 
@@ -850,9 +925,9 @@ def main(page:ft.Page):
 
         UTI = requests.get(f"{api_url}uti_by_sn", json={"sn": sn})
 
-        uti_dict = json.loads(json.dumps(UTI.json()))
+        uti_dict = UTI.json()
 
-        print(uti_dict)
+        # print(uti_dict)
 
         UTI_data.visible = True
 
@@ -882,73 +957,162 @@ def main(page:ft.Page):
     #     width=320
     # )
 
-    distance = ft.TextField(
+    def distance_list_maker():
+        distance_json = requests.get(f"{api_url}all_distances")
+        distance_list = distance_json.json()
+        print(distance_list)
+
+        distance_list_parsed = []
+
+        for distance in distance_list:
+            distance_list_parsed.append(str(distance["distance"]))
+
+        distance_dropdown.options = list(map(ft.dropdown.Option, distance_list_parsed))
+        
+        distance_dropdown.value = distance_list_parsed[0]
+
+    distance_dropdown = ft.Dropdown(
         label="Distance", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
-        width=320
+        width=320,
     )
 
-    sensitivity = ft.TextField(
+    def sensitivity_list_maker():
+        sens_json = requests.get(f"{api_url}all_sensitivities")
+        sens_list = sens_json.json()
+
+        sens_list_parsed = []
+
+        for sens in sens_list:
+            sens_list_parsed.append(str(sens["sensitivity"]))
+
+        sensitivity_dropdown.options = list(map(ft.dropdown.Option, sens_list_parsed))
+
+        sensitivity_dropdown.value = sens_list_parsed[0]
+
+    sensitivity_dropdown = ft.Dropdown(
         label="sensitivity", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
         width=320
     )
 
-    notch = ft.TextField(
+    def notch_list_maker():
+        notch_json = requests.get(f"{api_url}all_notches")
+        notch_list = notch_json.json()
+
+        notch_list_parsed = []
+
+        for notch in notch_list:
+            notch_list_parsed.append(str(notch["notch_depth"]))
+
+        notch_dropdown.options = list(map(ft.dropdown.Option, notch_list_parsed))
+
+        notch_dropdown.value = notch_list_parsed[0]
+
+    notch_dropdown = ft.Dropdown(
         label="notch", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
         width=320
     )
 
-    record = ft.TextField(
+    def record_list_maker():
+        record_json = requests.get(f"{api_url}all_records")
+        record_list = record_json.json()
+
+        record_list_parsed = []
+
+        for record in record_list:
+            record_list_parsed.append(str(record["recording_level"]))
+
+        record_dropdown.options = list(map(ft.dropdown.Option, record_list_parsed))
+
+        record_dropdown.value = record_list_parsed[0]
+
+    record_dropdown = ft.Dropdown(
         label="recording", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
         width=320
     )
 
-    axial_x = ft.TextField(
+    def scanning_list_maker():
+        scanning_json = requests.get(f"{api_url}all_scannings")
+        scanning_list = scanning_json.json()
+
+        scanning_list_parsed = []
+
+        for scanning in scanning_list:
+            scanning_list_parsed.append(str(scanning["scanning_direction"]))
+
+        circumferential_x.options = axial_x.options = list(map(ft.dropdown.Option, scanning_list_parsed))
+
+        circumferential_x.value = axial_x.value = scanning_list_parsed[0]
+
+    axial_x = ft.Dropdown(
         label="axial scanning", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
         width=320
     )
 
-    circumferental_x = ft.TextField(
-        label="circumferental", 
+    circumferential_x = ft.Dropdown(
+        label="circumferential / axial Scanning", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
         width=320
     )
 
-    inspection = ft.TextField(
+    def inspection_info_list_maker():
+        ins_json = requests.get(f"{api_url}all_inspection_info")
+        inspection_info = ins_json.json()
+
+        method_list_parsed = []
+
+        stage_list_parsed = []
+
+        agent_list_parsed = []
+
+        for method in inspection_info["method"]:
+            method_list_parsed.append(str(method["ins_method"]))
+
+        for agent in inspection_info["agent"]:
+            agent_list_parsed.append(str(agent["coupling_agent"]))
+
+        for stage in inspection_info["stage"]:
+            stage_list_parsed.append(str(stage["ins_stage"]))
+
+        ins_method_dropdown.options = list(map(ft.dropdown.Option, method_list_parsed))
+
+        ins_method_dropdown.value = method_list_parsed[0]
+
+        agent_dropdown.options = list(map(ft.dropdown.Option, agent_list_parsed))
+
+        agent_dropdown.value = agent_list_parsed[0]
+
+        stage_dropdown.options = list(map(ft.dropdown.Option, stage_list_parsed))
+
+        stage_dropdown.value = stage_list_parsed[0]
+
+    ins_method_dropdown = ft.Dropdown(
         label="inspection method", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
         width=320
     )
 
-    coupling = ft.TextField(
+    agent_dropdown = ft.Dropdown(
         label="coupling agent", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
-        width=320
+        width=320,
     )
 
-    inspector_s = ft.TextField(
+    stage_dropdown = ft.Dropdown(
         label="Inspection stage", 
         border_radius=10,
-        keyboard_type=ft.KeyboardType.TEXT,
         width=320
     )
 
     sn = ft.TextField(
-        label="s/n", 
+        label="sn", 
         border_radius=10,
         keyboard_type=ft.KeyboardType.NUMBER,
+        input_filter=ft.NumbersOnlyInputFilter(),
         width=320
     )
 
@@ -958,186 +1122,497 @@ def main(page:ft.Page):
         multiline=True,
         min_lines=6,
         max_lines=6,
-        border_radius=10
+        border_radius=10,
+        value="No Recordable Indications Found"
     )
 
     #aqui va la funcion de test sn list
 
+    # def test_sn_list_maker():
+    #     test_json = requests.get(f"{api_url}all_setups")
+    #     test_list = test_json.json()
+
+    #     test_list_parsed = []
+
+    #     for test in test_list:
+    #         test_list_parsed.append(f"{test["brand"]} {test["model"]} {test["sn"]}")
+
+
+    #     return test_list_parsed
+
+    # test_list_parsed = test_sn_list_maker()
+
+    # def test1_change(e):
+    #     # sn = e.control.value.split()[2]
+    #     for i in e.control.value.split():
+    #         try:
+    #             if type(int(i)) == int:
+    #                 sn = i
+    #                 print(f"{i} is int")
+    #             print(i)
+    #         except:
+    #             print("no int in test_sn1")
+
+    #     setup = requests.get(f"{api_url}setups_by_sn", json={"sn": sn})
+
+    #     setup_dict = setup.json()
+
+    #     # print(uti_dict)
+
+    #     # setup1_data.visible = True
+
+    #     # setup1_data.value = f"Brand: {setup_dict["brand"]}  Model: {setup_dict["model"]} \n SN: {setup_dict["sn"]} \n Frequency: {setup_dict["frequency"]} \n Size: {setup_dict["size"]} \n Angle: {setup_dict["angle"]} \n Sensitivity: {setup_dict["sensitivity"]} \n Reference Size: {setup_dict["reference_size"]} \n Reference level: {setup_dict["reference_level"]} \n Transfer correction: {setup_dict["transfer_correction"]} \n Scanning Level: {setup_dict["scanning_level"]} \n Screen Range: {setup_dict["screen_range"]} \n Scan type: {setup_dict["scan_type"]}"
+
+    #     test_calibration_container.height += 250
+
+    #     page.update()
+    
+    # def test2_change(e):
+    #     # sn = e.control.value.split()[2]
+    #     for i in e.control.value.split():
+    #         try:
+    #             if type(int(i)) == int:
+    #                 sn = i
+    #                 print(f"{i} is int")
+    #             print(i)
+    #         except:
+    #             print("no int in test_sn2")
+
+    #     setup = requests.get(f"{api_url}setups_by_sn", json={"sn": sn})
+
+    #     setup_dict = setup.json()
+
+    #     # print(uti_dict)
+
+    #     # setup2_data.visible = True
+
+    #     # setup2_data.value = f"Brand: {setup_dict["brand"]}  Model: {setup_dict["model"]} \n SN: {setup_dict["sn"]} \n Frequency: {setup_dict["frequency"]} \n Size: {setup_dict["size"]} \n Angle: {setup_dict["angle"]} \n Sensitivity: {setup_dict["sensitivity"]} \n Reference Size: {setup_dict["reference_size"]} \n Reference level: {setup_dict["reference_level"]} \n Transfer correction: {setup_dict["transfer_correction"]} \n Scanning Level: {setup_dict["scanning_level"]} \n Screen Range: {setup_dict["screen_range"]} \n Scan type: {setup_dict["scan_type"]}"
+
+    #     test_calibration_container.height += 250
+
+    #     page.update()
+
+    # def test3_change(e):
+    #     # sn = e.control.value.split()[2]
+    #     for i in e.control.value.split():
+    #         try:
+    #             if type(int(i)) == int:
+    #                 sn = i
+    #                 print(f"{i} is int")
+    #             print(i)
+    #         except:
+    #             print("no int in test_sn3")
+
+    #     setup = requests.get(f"{api_url}setups_by_sn", json={"sn": sn})
+
+    #     setup_dict = setup.json()
+
+    #     # print(uti_dict)
+
+    #     # setup3_data.visible = True
+
+    #     # setup3_data.value = f"Brand: {setup_dict["brand"]}  Model: {setup_dict["model"]} \n SN: {setup_dict["sn"]} \n Frequency: {setup_dict["frequency"]} \n Size: {setup_dict["size"]} \n Angle: {setup_dict["angle"]} \n Sensitivity: {setup_dict["sensitivity"]} \n Reference Size: {setup_dict["reference_size"]} \n Reference level: {setup_dict["reference_level"]} \n Transfer correction: {setup_dict["transfer_correction"]} \n Scanning Level: {setup_dict["scanning_level"]} \n Screen Range: {setup_dict["screen_range"]} \n Scan type: {setup_dict["scan_type"]}"
+
+    #     test_calibration_container.height += 250
+
+    #     page.update()
+
+    # def test4_change(e):
+    #     # sn = e.control.value.split()[2]
+    #     for i in e.control.value.split():
+    #         try:
+    #             if type(int(i)) == int:
+    #                 sn = i
+    #                 print(f"{i} is int")
+    #             print(i)
+    #         except:
+    #             print("no int in test_sn4")
+
+    #     setup = requests.get(f"{api_url}setups_by_sn", json={"sn": sn})
+
+    #     setup_dict = setup.json()
+
+    #     # print(uti_dict)
+
+    #     # setup4_data.visible = True
+
+    #     # setup4_data.value = f"Brand: {setup_dict["brand"]}  Model: {setup_dict["model"]} \n SN: {setup_dict["sn"]} \n Frequency: {setup_dict["frequency"]} \n Size: {setup_dict["size"]} \n Angle: {setup_dict["angle"]} \n Sensitivity: {setup_dict["sensitivity"]} \n Reference Size: {setup_dict["reference_size"]} \n Reference level: {setup_dict["reference_level"]} \n Transfer correction: {setup_dict["transfer_correction"]} \n Scanning Level: {setup_dict["scanning_level"]} \n Screen Range: {setup_dict["screen_range"]} \n Scan type: {setup_dict["scan_type"]}"
+
+    #     test_calibration_container.height += 250
+
+    #     page.update()
+
+    # def test5_change(e):
+    #     # sn = e.control.value.split()[2]
+    #     for i in e.control.value.split():
+    #         try:
+    #             if type(int(i)) == int:
+    #                 sn = i
+    #                 print(f"{i} is int")
+    #             print(i)
+    #         except:
+    #             print("no int in test_sn5")
+
+    #     setup = requests.get(f"{api_url}setups_by_sn", json={"sn": sn})
+
+    #     setup_dict = setup.json()
+
+    #     # print(uti_dict)
+
+    #     # setup5_data.visible = True
+
+    #     # setup5_data.value = f"Brand: {setup_dict["brand"]}  Model: {setup_dict["model"]} \n SN: {setup_dict["sn"]} \n Frequency: {setup_dict["frequency"]} \n Size: {setup_dict["size"]} \n Angle: {setup_dict["angle"]} \n Sensitivity: {setup_dict["sensitivity"]} \n Reference Size: {setup_dict["reference_size"]} \n Reference level: {setup_dict["reference_level"]} \n Transfer correction: {setup_dict["transfer_correction"]} \n Scanning Level: {setup_dict["scanning_level"]} \n Screen Range: {setup_dict["screen_range"]} \n Scan type: {setup_dict["scan_type"]}"
+
+    #     test_calibration_container.height += 250
+
+    #     page.update()
+
+    # test_sn1 = ft.Dropdown(
+    #     label="Test Serial Number 1",
+    #     bgcolor="white",
+    #     border_radius=10,
+    #     width=320,
+    #     color="black",
+    #     options=list(map(ft.dropdown.Option, test_list_parsed)),
+    #     on_change=test1_change
+    # )
+
+    # setup1_data = ft.Text(
+    #     visible=False,
+    #     text_align=ft.TextAlign.CENTER
+    # )
+
+    # test_sn2 = ft.Dropdown(
+    #     label="Test Serial Number 2",
+    #     bgcolor="white",
+    #     border_radius=10,
+    #     width=320,
+    #     color="black",
+    #     options=list(map(ft.dropdown.Option, test_list_parsed)),
+    #     visible=False,
+    #     on_change=test2_change
+    # )
+
+    # setup2_data = ft.Text(
+    #     visible=False,
+    #     text_align=ft.TextAlign.CENTER
+    # )
+
+    # test_sn3 = ft.Dropdown(
+    #     label="Test Serial Number 3",
+    #     bgcolor="white",
+    #     border_radius=10,
+    #     width=320,
+    #     color="black",
+    #     options=list(map(ft.dropdown.Option, test_list_parsed)),
+    #     visible=False,
+    #     on_change=test3_change
+    # )
+
+    # setup3_data = ft.Text(
+    #     visible=False,
+    #     text_align=ft.TextAlign.CENTER
+    # )
+
+    # test_sn4 = ft.Dropdown(
+    #     label="Test Serial Number 4",
+    #     bgcolor="white",
+    #     border_radius=10,
+    #     width=320,
+    #     color="black",
+    #     options=list(map(ft.dropdown.Option, test_list_parsed)),
+    #     visible=False,
+    #     on_change=test4_change
+    # )
+
+    # setup4_data = ft.Text(
+    #     visible=False,
+    #     text_align=ft.TextAlign.CENTER
+    # )
+
+    # test_sn5 = ft.Dropdown(
+    #     label="Test Serial Number 5",
+    #     bgcolor="white",
+    #     border_radius=10,
+    #     width=320,
+    #     color="black",
+    #     options=list(map(ft.dropdown.Option, test_list_parsed)),
+    #     visible=False,
+    #     on_change=test5_change
+    # )
+
+    # setup5_data = ft.Text(
+    #     visible=False,
+    #     text_align=ft.TextAlign.CENTER
+    # )
+
+    
+    # textarea_counter = 1
+
+    # def add_textarea(e):
+    #     nonlocal textarea_counter, test_sn_height, test_calibration_container
+        
+    #     if textarea_counter >= 1 and textarea_counter <= 5:
+    #         textarea_counter = textarea_counter + 1
+    #         if textarea_counter == 2:
+    #             test_sn2.visible = True
+    #             test_calibration_container.height += 70
+    #         elif textarea_counter == 3:
+    #             test_sn3.visible = True
+    #             test_calibration_container.height += 70
+    #         elif textarea_counter == 4:
+    #             test_sn4.visible = True
+    #             test_calibration_container.height += 70
+    #         elif textarea_counter == 5:
+    #             test_sn5.visible = True
+    #             test_calibration_container.height += 70
+
+    #         e.page.update()
+    #     elif textarea_counter > 5:
+    #         textarea_counter = textarea_counter - 1
+    #     elif textarea_counter < 1:
+    #         textarea_counter = textarea_counter + 1
+    #     else:
+    #         print("error +")
+
+    # def del_textarea(e):
+    #     nonlocal textarea_counter, test_sn_height, test_calibration_container
+    #     if textarea_counter >= 1 and textarea_counter <= 5:
+    #         if textarea_counter == 2:
+    #             test_sn2.visible = False
+    #             test_sn2.value = ""
+    #             # setup2_data.visible = False
+    #             test_calibration_container.height -= 70
+    #         elif textarea_counter == 3:
+    #             test_sn3.visible = False
+    #             test_sn3.value = ""
+    #             # setup3_data.visible = False
+    #             test_calibration_container.height -= 70
+    #         elif textarea_counter == 4:
+    #             test_sn4.visible = False
+    #             test_sn4.value = ""
+    #             # setup4_data.visible = False
+    #             test_calibration_container.height -= 70
+    #         elif textarea_counter == 5:
+    #             test_sn5.visible = False
+    #             test_sn5.value = ""
+    #             # setup5_data.visible = False
+    #             test_calibration_container.height -= 70
+    #         textarea_counter = textarea_counter - 1
+
+    #         if textarea_counter != 0:
+    #             test_calibration_container.height = (300 * (textarea_counter-1)) + 250
+    #         else:
+    #             test_calibration_container.height = 250
+
+    #         e.page.update()
+    #     elif textarea_counter < 1:
+    #         textarea_counter = textarea_counter + 1
+    #     elif textarea_counter > 5:
+    #         textarea_counter = textarea_counter - 1
+    #     else:
+    #         print("error -")
+
+
+    # add_btn = ft.IconButton(
+    #     icon= ft.icons.ADD,
+    #     on_click=add_textarea
+    # )
+    
+    # del_btn = ft.IconButton(
+    #     icon= ft.icons.REMOVE_ROUNDED,
+    #     on_click=del_textarea
+    # )
+
+    #aqui va la funcion de test sn list
     def test_sn_list_maker():
-        test_json = requests.get(f"{api_url}all_setups")
-        test_list = json.loads(json.dumps(test_json.json()))
-
+        test_json = requests.get(f"{api_url}all_probes")
+        test_list = test_json.json()
         test_list_parsed = []
-
         for test in test_list:
-            test_list_parsed.append(f"{test["brand"]} {test["model"]} {test["sn"]}")
-
-
+            test_list_parsed.append(f"{test["sn"]}")
         return test_list_parsed
-
+    
     test_list_parsed = test_sn_list_maker()
 
-    def test_change(e):
-        pass
-
-    test_sn1 = ft.Dropdown(
-        label="Test Serial Number 1",
+    test_sn_dropdown = ft.Dropdown(
+        label="Probe SN",
+        width=200,
         bgcolor="white",
-        border_radius=10,
-        width=320,
         color="black",
         options=list(map(ft.dropdown.Option, test_list_parsed)),
-        on_change=test_change
+        value=test_list_parsed[0]
     )
 
-    test_sn2 = ft.Dropdown(
-        label="Test Serial Number 2",
-        bgcolor="white",
-        border_radius=10,
-        width=320,
-        color="black",
-        options=list(map(ft.dropdown.Option, test_list_parsed)),
-        visible=False,
-        on_change=test_change
+    def del_row(e):
+        test_sn_table.rows.pop()
+        page.update()
+
+    test_sn_cell_del_btn = ft.IconButton(
+        icon=ft.icons.DELETE_FOREVER_ROUNDED,
+        on_click=del_row
     )
 
-    test_sn3 = ft.Dropdown(
-        label="Test Serial Number 3",
-        bgcolor="white",
-        border_radius=10,
-        width=320,
-        color="black",
-        options=list(map(ft.dropdown.Option, test_list_parsed)),
-        visible=False,
-        on_change=test_change
+    def test_sn_adder(e):
+        sn = test_sn_dropdown.value
+        if sn is not None:
+            probe_sn_json = requests.get(f"{api_url}probes_by_sn", json={"sn" : sn})
+            probe_sn = probe_sn_json.json()
+            test_sn_table.rows.append(ft.DataRow( cells=[ft.DataCell(ft.Text(f"{probe_sn["brand"]}")),ft.DataCell(ft.Text(f"{probe_sn["model"]}")),ft.DataCell(ft.Text(f"{probe_sn["sn"]}")),ft.DataCell(ft.Text(f"{probe_sn["freq"]}")),ft.DataCell(ft.Text(f"{probe_sn["size"]}")),ft.DataCell(ft.Text(f"{probe_sn["angle"]}"))]))
+            
+
+        page.update()
+
+        print(test_sn_table.rows[-1].cells[0].content.value)
+
+    test_sn_add_btn = ft.IconButton(
+        icon=ft.icons.ADD,
+        on_click=test_sn_adder
     )
 
-    test_sn4 = ft.Dropdown(
-        label="Test Serial Number 4",
-        bgcolor="white",
-        border_radius=10,
-        width=320,
-        color="black",
-        options=list(map(ft.dropdown.Option, test_list_parsed)),
-        visible=False,
-        on_change=test_change
+    test_sn_adder_space = ft.Column(
+        controls=[
+            ft.Row(
+                controls=[
+                    test_sn_dropdown,
+                    test_sn_add_btn,
+                    test_sn_cell_del_btn
+                ],
+                alignment="center"
+            )
+        ],
+        horizontal_alignment="center"
     )
 
-    test_sn5 = ft.Dropdown(
-        label="Test Serial Number 5",
-        bgcolor="white",
-        border_radius=10,
-        width=320,
-        color="black",
-        options=list(map(ft.dropdown.Option, test_list_parsed)),
-        visible=False,
-        on_change=test_change
+    test_sn_table = ft.DataTable(
+        show_checkbox_column=True,
+        columns=[
+            ft.DataColumn(
+                ft.Text("Brand"),
+            ),
+            ft.DataColumn(
+                ft.Text("Model"),
+            ),
+            ft.DataColumn(
+                ft.Text("SN"),
+            ),
+            ft.DataColumn(
+                 ft.Text("Freq"),
+            ),
+            ft.DataColumn(
+                ft.Text("Size"),
+            ),
+            ft.DataColumn(
+                ft.Text("Angle"),
+            )
+        ],
+        rows=[
+            # ft.DataRow(
+            #     cells=[
+            #         ft.DataCell(ft.IconButton(icon=ft.icons.DELETE_FOREVER_ROUNDED)),
+            #         ft.DataCell(ft.Text("OLYMPUS")),
+            #         ft.DataCell(ft.Text("OLYMPUS")),
+            #         ft.DataCell(ft.Text("OLYMPUS")),
+            #         ft.DataCell(ft.Text("OLYMPUS")),
+            #         ft.DataCell(ft.Text("OLYMPUS")),
+            #         ft.DataCell(ft.Text("OLYMPUS"))
+            #     ]
+            # )
+        ]
     )
 
-    # test_sn1 = ft.TextField(
-    #     label="Test Serial Number 1", 
-    #     border_radius=10,
-    #     keyboard_type=ft.KeyboardType.TEXT,
-    #     width=320,
+    test_sn_table_column = ft.Column(
+        controls=[
+            ft.Container(content=ft.Column([ft.Row([test_sn_table], scroll=ft.ScrollMode.ALWAYS)], scroll=ft.ScrollMode.ALWAYS))
+        ]
+    )
+
+    # test_sn_table1 = ft.DataTable(
+    #     width=390,
+    #     show_checkbox_column=True,
+    #     columns=[
+    #         ft.DataColumn(
+    #             ft.Text("Selección")
+    #         ),
+    #         ft.DataColumn(
+    #             ft.Text("Brand"),
+    #         ),
+    #         ft.DataColumn(
+    #             ft.Text("Model"),
+    #         ),
+    #         ft.DataColumn(
+    #             ft.Text("SN"),
+    #         )
+    #     ],
+    #     rows=[
+    #         ft.DataRow(
+    #             cells=[
+    #                 ft.DataCell(ft.Checkbox()),
+    #                 ft.DataCell(ft.Text("OLYMPUS")),
+    #                 ft.DataCell(ft.Text("OLYMPUS")),
+    #                 ft.DataCell(ft.Text("OLYMPUS"))
+    #             ]
+    #         )
+    #     ]
     # )
 
-    # test_sn2 = ft.TextField(
-    #     label="Test Serial Number 2", 
-    #     border_radius=10,
-    #     keyboard_type=ft.KeyboardType.TEXT,
-    #     width=320,
-    #     visible=False
+    # test_sn_table2 = ft.DataTable(
+    #     width=390,
+    #     show_checkbox_column=True,
+    #     columns=[
+    #         ft.DataColumn(
+    #             ft.Text("Freq"),
+    #         ),
+    #         ft.DataColumn(
+    #             ft.Text("Size"),
+    #         ),
+    #         ft.DataColumn(
+    #             ft.Text("Angle"),
+    #         )
+    #     ],
+    #     rows=[
+    #         ft.DataRow(
+    #             cells=[
+    #                 ft.DataCell(ft.Text("OLYMPUS")),
+    #                 ft.DataCell(ft.Text("OLYMPUS")),
+    #                 ft.DataCell(ft.Text("OLYMPUS"))
+    #             ]
+    #         )
+    #     ]
     # )
 
-    # test_sn3 = ft.TextField(
-    #     label="Test Serial Number 3", 
-    #     border_radius=10,
-    #     keyboard_type=ft.KeyboardType.TEXT,
-    #     width=320,
-    #     visible=False
-    # )
-
-    # test_sn4 = ft.TextField(
-    #     label="Test Serial Number 4", 
-    #     border_radius=10,
-    #     keyboard_type=ft.KeyboardType.TEXT,
-    #     width=320,
-    #     visible=False
-    # )
-
-    # test_sn5 = ft.TextField(
-    #     label="Test Serial Number 5", 
-    #     border_radius=10,
-    #     keyboard_type=ft.KeyboardType.TEXT,
-    #     width=320,
-    #     visible=False
-    # )
-
-    textarea_counter = 1
-
-    def add_textarea(e):
-        nonlocal textarea_counter, test_sn_height
-        
-        if textarea_counter >= 1 and textarea_counter <= 5:
-            textarea_counter = textarea_counter + 1
-            if textarea_counter == 2:
-                test_sn2.visible = True
-            elif textarea_counter == 3:
-                test_sn3.visible = True
-            elif textarea_counter == 4:
-                test_sn4.visible = True
-            elif textarea_counter == 5:
-                test_sn5.visible = True
-
-
-
-            e.page.update()
-        elif textarea_counter > 5:
-            textarea_counter = textarea_counter - 1
-        elif textarea_counter < 1:
-            textarea_counter = textarea_counter + 1
-        else:
-            print("error +")
-
-    def del_textarea(e):
-        nonlocal textarea_counter, test_sn_height
-        if textarea_counter >= 1 and textarea_counter <= 5:
-            if textarea_counter == 2:
-                test_sn2.visible = False
-            elif textarea_counter == 3:
-                test_sn3.visible = False
-            elif textarea_counter == 4:
-                test_sn4.visible = False
-            elif textarea_counter == 5:
-                test_sn5.visible = False
-            textarea_counter = textarea_counter - 1
-
-            e.page.update()
-        elif textarea_counter < 1:
-            textarea_counter = textarea_counter + 1
-        elif textarea_counter > 5:
-            textarea_counter = textarea_counter - 1
-        else:
-            print("error -")
-
-
-    add_btn = ft.IconButton(
-        icon= ft.icons.ADD,
-        on_click=add_textarea
+    test_calibration_container = ft.Container(
+        width=400,
+        height=500,
+        padding=ft.padding.only(top=10),
+        bgcolor=ft.colors.WHITE,
+        content=ft.Column(
+            horizontal_alignment="center",
+            controls=[
+                ft.Text("Test calibration setup", text_align="center", size=25, weight="bold", color="black"),
+                ft.Text("Serial Number", size=20),
+                test_sn_adder_space,
+                test_sn_table_column,
+                # test_sn1,
+                # setup1_data,
+                # test_sn2,
+                # setup2_data,
+                # test_sn3,
+                # setup3_data,
+                # test_sn4,
+                # setup4_data,
+                # test_sn5,
+                # setup5_data,
+                # ft.Row(
+                    # alignment=MainAxisAlignment.END,
+                    # controls=[
+                        # # del_btn,
+                        # # add_btn
+                    # ]
+                # )
+            ]
+        )
     )
-    
-    del_btn = ft.IconButton(
-        icon= ft.icons.REMOVE_ROUNDED,
-        on_click=del_textarea
-    )
-    
-
-
-    # job = Stepper_qty()
-    # od_val = Stepper()
-    # id_val = Stepper()
-    # thick_val = Stepper()
-    # height_val = Stepper()
 
     job_qty_txtbox = ft.TextField(
         text_align="center",
@@ -1265,9 +1740,107 @@ def main(page:ft.Page):
         on_change=thick_validation
     )
 
+    def bar_change(e):
+        index = e.control.selected_index
+        if index == 0:
+            e.page.go(f"/main_screen")
+        if index == 1:
+            e.page.go(f"/admin")
+        if index == 2:
+            e.page.go(f"/")
+            user_mail = None 
+        e.page.update()
+
+    NAV = ft.NavigationBar(
+        destinations=[
+            ft.NavigationBarDestination(icon=ft.icons.EDIT_NOTE, label="Reporte"),
+            ft.NavigationBarDestination(icon=ft.icons.ADMIN_PANEL_SETTINGS, label="Admin"),
+            ft.NavigationBarDestination(icon=ft.icons.EXIT_TO_APP_SHARP, label="Exit")
+        ],
+        on_change=bar_change
+    )
+
     part_info_text = ft.Text(value="", visible=False)
 
+    error_msg_text = ft.Text(value="", visible=False)
+
+    user_mail = ""
+
+    username_reg = ft.TextField(
+        label="Username", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.NAME,
+        width=320
+
+    )
+    email_reg = ft.TextField(
+        label="email", 
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.EMAIL,
+        width=320
+    )
+    password_reg = ft.TextField(
+        label="password",
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        password=True,
+        can_reveal_password=True,
+        width=320
+    )
+    conf_pass_reg = ft.TextField(
+        label="password",
+        border_radius=10,
+        keyboard_type=ft.KeyboardType.TEXT,
+        password=True,
+        can_reveal_password=True,
+        width=320
+    )
+
+    def login_fun():
+        
+        data = {
+            "email":user_log.value,
+            "password":user_psw.value
+        }
+
+        register_req = requests.get(f"{api_url}login", json=data)
+
+        if register_req.json()["error"]:
+            error_msg_text.visible = register_req.json()["visible"]
+            error_msg_text.value = register_req.json()["error_msg"]
+        else:
+            error_msg_text.visible = False
+            user_log.value = None
+            user_psw.value = None
+            nonlocal user_mail 
+            user_mail = register_req.json()["mail"]
+            page.go(f"/main_screen")
+
+        page.update()
+
+    def register_fun():
+        data = {
+            "email":email_reg.value,
+            "user":username_reg.value,
+            "password":password_reg.value,
+            "confpassword":conf_pass_reg.value
+        }
+
+        register_req = requests.post(f"{api_url}register", json=data)
+
+        if register_req.json()["error"]:
+            error_msg_text.visible = register_req.json()["visible"]
+            error_msg_text.value = register_req.json()["error_msg"]
+        else:
+            error_msg_text.visible = False
+            page.go(f"/")
+
+        page.update()
+
+
     def route_chnage(route):
+        nonlocal user_mail
+
         page.views.clear()
         page.views.append(
             ft.View(
@@ -1293,6 +1866,7 @@ def main(page:ft.Page):
                                             ft.Container(
                                                 height=10
                                             ),
+                                            error_msg_text,
                                             ft.ElevatedButton(
                                                 "login",
                                                 elevation=30,
@@ -1300,8 +1874,20 @@ def main(page:ft.Page):
                                                 height=50,
                                                 bgcolor=ft.colors.PURPLE,
                                                 color="white",
-                                                on_click=lambda _:page.go("/main_screen")
-                                            )
+                                                on_click=lambda _:login_fun()
+                                            ),
+                                            ft.Column(
+                                                alignment="center",
+                                                controls=[
+                                                    ft.Row(
+                                                        alignment="center",
+                                                        controls=[
+                                                            ft.Text("No tienes usuario?,"),
+                                                            ft.TextButton("Registrate Aqui!", on_click=lambda _:page.go("/register"))
+                                                        ]
+                                                    )
+                                                ]
+                                            ),
                                         ],
                                       
                                     )
@@ -1313,16 +1899,78 @@ def main(page:ft.Page):
             )
         ),
 
-        if page.route == "/main_screen":
+        if page.route == "/register":
+            page.window.height = 770
             page.views.append(
                 ft.View(
-                    "/main",
+                    "/register",
+                    bgcolor=ft.colors.BLUE_50,
+                    controls=[
+                        ft.Container(
+                            width=400,
+                            expand=True,
+                            content=ft.Column(
+                                alignment="center",
+                                horizontal_alignment="center",
+                                controls=[
+                                    ft.Icon(name=ft.icons.PERSON, size=250, color="black"),
+                                    ft.Container(
+                                        content=ft.Column(
+                                            alignment="center",
+                                            horizontal_alignment="center",
+                                            spacing=15,
+                                            controls=[
+                                                username_reg,
+                                                email_reg,
+                                                password_reg,
+                                                conf_pass_reg,
+                                                ft.Container(
+                                                    height=10
+                                                ),
+                                                error_msg_text,
+                                                ft.ElevatedButton(
+                                                    "Registrarse",
+                                                    elevation=30,
+                                                    width=200,
+                                                    height=50,
+                                                    bgcolor=ft.colors.PURPLE,
+                                                    color="white",
+                                                    on_click=lambda _:register_fun()
+                                                ),
+                                                ft.Column(
+                                                    alignment="center",
+                                                    controls=[
+                                                        ft.Row(
+                                                            alignment="center",
+                                                            controls=[
+                                                                ft.TextButton("Regresar", on_click=lambda _:page.go("/"))
+                                                            ]
+                                                        )
+                                                    ]
+                                                ),
+                                            ],
+
+                                        )
+                                    )
+                                ]
+                            )
+                        )
+                    ]
+                )
+            )
+
+        if page.route == "/main_screen":
+            ins_control = reload_inspectors()
+            page.views.append(
+                ft.View(
+                    "/main_screen",
                     scroll="always",
                     horizontal_alignment="center",
                     vertical_alignment="center",
                     padding=0,
                     bgcolor=ft.colors.BLUE_50,
                     controls=[
+                        NAV,
                         ft.SafeArea(
                             ft.Container(
                                 height=10,
@@ -1365,7 +2013,7 @@ def main(page:ft.Page):
                                             padding=ft.padding.only(top=10),
                                             content=ft.Column(
                                                 spacing=5,
-                                                controls=in_name # here, the problem, in?name is a list, so remove this, look
+                                                controls=ins_control # here, the problem, in?name is a list, so remove this, look
                                                     
                                                 ) 
                                             ),
@@ -1560,31 +2208,33 @@ def main(page:ft.Page):
                                         ]
                                     )
                                 ),
-                                ft.Container(
-                                    width=400,
-                                    height=test_sn_height + 40,
-                                    padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
-                                    content=ft.Column(
-                                        horizontal_alignment="center",
-                                        controls=[
-                                            ft.Text("Test calibration setup", text_align="center", size=25, weight="bold", color="black"),
-                                            ft.Text("Serial Number", size=20),
-                                            test_sn1,
-                                            test_sn2,
-                                            test_sn3,
-                                            test_sn4,
-                                            test_sn5,
-                                            ft.Row(
-                                                alignment=MainAxisAlignment.END,
-                                                controls=[
-                                                    del_btn,
-                                                    add_btn
-                                                ]
-                                            )
-                                        ]
-                                    )
-                                ),
+                                test_calibration_container,
+                                # ft.Container(
+                                #     width=400,
+                                #     height=test_sn_height + 40,
+                                #     padding=ft.padding.only(top=10),
+                                #     bgcolor=ft.colors.WHITE,
+                                #     content=ft.Column(
+                                #         horizontal_alignment="center",
+                                #         controls=[
+                                #             ft.Text("Test calibration setup", text_align="center", size=25, weight="bold", color="black"),
+                                #             ft.Text("Serial Number", size=20),
+                                #             test_sn1,
+                                #             setup1_data,
+                                #             test_sn2,
+                                #             test_sn3,
+                                #             test_sn4,
+                                #             test_sn5,
+                                #             ft.Row(
+                                #                 alignment=MainAxisAlignment.END,
+                                #                 controls=[
+                                #                     del_btn,
+                                #                     add_btn
+                                #                 ]
+                                #             )
+                                #         ]
+                                #     ),
+                                # ),
                                 ft.Container(
                                     width=400,
                                     height=490,
@@ -1595,13 +2245,13 @@ def main(page:ft.Page):
                                         controls=[
                                             ft.Text("Calibration blocks", text_align="center", size=25, weight="bold", color="black"),
                                             ft.Text("Distance calibration angle verification", size=20, text_align="center"),
-                                            distance,
+                                            distance_dropdown,
                                             ft.Text("Sensitivity Block", size=20),
-                                            sensitivity,
+                                            sensitivity_dropdown,
                                             ft.Text("Notch Depth", size=20),
-                                            notch,
+                                            notch_dropdown,
                                             ft.Text("Recording Level", size=20),
-                                            record, 
+                                            record_dropdown, 
                                         ]
                                     )
                                 ),
@@ -1617,7 +2267,7 @@ def main(page:ft.Page):
                                             ft.Text("Axial scanning", size=20, text_align="center"),
                                             axial_x,
                                             ft.Text("Circumferential/ Axial Scanning", size=20),
-                                            circumferental_x,
+                                            circumferential_x,
                                         ]
                                     )
                                 ),
@@ -1631,11 +2281,11 @@ def main(page:ft.Page):
                                         controls=[
                                             ft.Text("Inspection Information", text_align="center", size=25, weight="bold", color="black"),
                                             ft.Text("Inspection Method", size=20, text_align="center"),
-                                            inspection,
+                                            ins_method_dropdown,
                                             ft.Text("coupling agent", size=20, text_align="center"),
-                                            coupling,
+                                            agent_dropdown,
                                             ft.Text("Inspection Stage", size=20),
-                                            inspector_s,
+                                            stage_dropdown,
                                         ]
                                     )
                                 ),
@@ -1686,6 +2336,33 @@ def main(page:ft.Page):
                 )
             )
      
+        if page.route == "/admin":
+            page.views.append(
+                ft.View(
+                    "/admin",
+                    scroll="always",
+                    horizontal_alignment="center",
+                    vertical_alignment="center",
+                    padding=0,
+                    bgcolor=ft.colors.BLUE_50,
+                    controls=[
+                        NAV,
+                        ft.SafeArea(
+                            ft.Container(
+                                height=10,
+                                expand=True,
+                                bgcolor=ft.colors.PURPLE,
+                            ),
+                        ),
+                        ft.Column(
+                            controls=[
+                                admin_page(page, user_mail),
+                            ]
+                        )
+                    ]
+                )
+            )
+
         page.update()
     
     
@@ -1701,7 +2378,3 @@ def main(page:ft.Page):
 
 
 ft.app(target=main)
-
-
-
-
