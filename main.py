@@ -1,3 +1,5 @@
+from importlib.machinery import OPTIMIZED_BYTECODE_SUFFIXES
+import string
 from dotenv import load_dotenv
 from flet import*
 from pathlib import Path
@@ -5,14 +7,10 @@ from playwright.async_api import async_playwright
 from admin_App import admin_page
 import flet as ft 
 import os
-import json
 import requests
 import datetime
-import pdfkit
-import asyncio
 
-from models import Agent
-from template_filler import login
+from models import Sensitivity_Method
 
 year = datetime.datetime.now().year
 downloads_path = str(Path.home() / "Downloads")
@@ -351,7 +349,7 @@ def main(page:ft.Page):
             plant_name.visible = False
             contact_name.visible = False
             send_all_btn.visible = True
-            page.update() #changed from e.page.update() to page.update 
+            page.update()
         else:
             other_client_name.visible = False
             other_plant_name.visible = False
@@ -360,7 +358,7 @@ def main(page:ft.Page):
             contact_name.visible = True
             send_all_btn.visible = False
 
-            page.update() #changed from e.page.update() to page.update
+            page.update()
 
         client_data = {
             "name" : client_name.value
@@ -378,17 +376,21 @@ def main(page:ft.Page):
 
         contact_name.value = contacts_list_parsed[0]
 
-        nde_option_maker()
-        acc_crit_option_maker()
-        acabado_option_maker()
-        distance_list_maker()
-        sensitivity_list_maker()
-        notch_list_maker()
-        record_list_maker()
-        scanning_list_maker()
-        inspection_info_list_maker()
+        #testing each one of the list/option makers to check which one causes the error of 
+        #the app not updating
 
-        e.page.update()
+        nde_option_maker() #tested, the app works with this single one enabled
+        acc_crit_option_maker() #tested, the app works with this single one enabled
+        acabado_option_maker() #tested, the app works with this single one enabled
+        distance_list_maker() #tested, the app works with this single one enabled
+        sensitivity_list_maker() #tested, the app works with this single one enabled
+        notch_list_maker() #tested, the app works with this single one enabled
+        record_list_maker() #tested, the app works with this single one enabled
+        scanning_list_maker() #tested, the app won´t work with this single one enabled, checking what caused the failure
+        #^ i think i corrected it, it the control values referenced to the other control value and both referenced to the value that it should've had
+        inspection_info_list_maker() #tested, the app works with this single one enabled
+
+        page.update()
     
     client_name = ft.Dropdown(
         label="Nombre del Cliente",
@@ -412,15 +414,14 @@ def main(page:ft.Page):
 
     def plant_change(e):
         # print(e.control.value)
-        e.page.update()
         if e.control.value == "Otro":
             other_plant_name.visible = True
             other_plant_button.visible = True
-            e.page.update()
+            page.update()
         else:
             other_plant_name.visible = False
             other_plant_button.visible = False
-            e.page.update()
+            page.update()
 
     def send_plant(e):
         if other_plant_name.value and client_name.value:
@@ -519,7 +520,7 @@ def main(page:ft.Page):
     other_plant_button = ft.ElevatedButton(
         text="Guardar Planta",
         color="white",
-        bgcolor=ft.colors.PURPLE,
+        bgcolor=ft.Colors.PURPLE,
         visible=False,
         on_click=send_plant
     )
@@ -533,7 +534,7 @@ def main(page:ft.Page):
         else:
             other_contact_name.visible = False
             other_contact_button.visible = False
-            e.page.update()
+            page.update()
 
     contact_name = ft.Dropdown(
         label="Nombre del contacto",
@@ -556,7 +557,7 @@ def main(page:ft.Page):
     other_contact_button = ft.ElevatedButton(
         text="Guardar Contacto",
         color="white",
-        bgcolor=ft.colors.PURPLE,
+        bgcolor=ft.Colors.PURPLE,
         visible=False,
         on_click=send_contact
     )
@@ -649,7 +650,7 @@ def main(page:ft.Page):
     send_all_btn = ft.ElevatedButton(
         text="Guardar Cliente",
         color="white",
-        bgcolor=ft.colors.PURPLE,
+        bgcolor=ft.Colors.PURPLE,
         visible=False,
         on_click=send_all
     )
@@ -672,83 +673,117 @@ def main(page:ft.Page):
         #hacer una función para que se guarde el reporte en la base de datos y se haga un numero de reporte
         #url = f"{api_url}?test={box_group.value}&report_num={box_group.value}-R-{year}-234&client_name={client_name_var}&plant={plant_name_var}&contact_name={contact.value}&part_desc={Description.value}&material={material.value}&heat={heat.value}&j_order={job_order.value}&j_qty={job.value}&od={od_val.value}&id={id_val.value}&width={thick_val.value}&height={height_val.value}&NDE={nde_val.value}&crit_accept={accept_val.value}&rough={surface_val.value}&uti_sn={uti_sn.value}&sn1={test_sn1.value}&d_cal={distance.value}&sens_block={sensitivity.value}&notch={notch.value}&rec_lvl={record.value}&ax_scanning={axial_x.value}&circ_ax_scanning={circumferental_x.value}&method={inspection.value}&coupling={coupling.value}&stage={inspector_s.value}&remarks={textarea.value}&insp_name={inspectors_list[0]}&ndt_act={ndt_act.value}"
         #print(url)
-
-        data = {
-            "test":box_group.value,
-            "client_name":client_name.value,
-            "plant":plant_name.value,
-            "contact_name":contact_name.value,
-            "part_desc":Description.value,
-            "material":material.value,
-            "heat":heat.value,
-            "j_order":job_order.value,
-            "j_qty":job_qty_txtbox.value,
-            "od":float(od_txtbox.value),
-            "id":float(id_txtbox.value),
-            "width":float(thick_txtbox.value),
-            "height":float(height_txtbox.value),
-            "NDE":nde_val.value,
-            "crit_accept":accept_val.value,
-            #rehacer la parte de surface roughness para agregar el acabado superficial
-            "rough":f"{acabado.value}, (≤{surface_val.value} {measure.value})",
-            "uti_sn":int(uti_sn.value.split()[1]),
-            "sn1": if_int(test_sn1.value.split()),
-            "d_cal":distance_dropdown.value,
-            "sens_block":sensitivity_dropdown.value,
-            "notch":notch_dropdown.value,
-            "rec_lvl":record_dropdown.value,
-            "ax_scanning":axial_x.value,
-            "circ_ax_scanning":circumferential_x.value,
-            "method":ins_method_dropdown.value,
-            "coupling":agent_dropdown.value,
-            "stage":stage_dropdown.value,
-            "remarks":textarea.value,
-            "insp_name":inspectors_list[0],
-            "ndt_act":ndt_act.value
-        }
+        try:
+            data = {
+                "test":box_group.value,
+                "client_name":client_name.value,
+                "plant":plant_name.value,
+                "contact_name":contact_name.value,
+                "part_desc":Description.value,
+                "material":material.value,
+                "heat":heat.value,
+                "j_order":job_order.value + f" {job_order.suffix_text}",
+                "j_qty":job_qty_txtbox.value + " Pieces",
+                "od":f"{float(od_txtbox.value)} {od_txtbox.suffix_text}",
+                "id":f"{float(id_txtbox.value)} {od_txtbox.suffix_text}",
+                "width":f"{float(thick_txtbox.value)} {od_txtbox.suffix_text}",
+                "height":f"{float(height_txtbox.value)} {od_txtbox.suffix_text}",
+                "NDE":nde_val.value,
+                "crit_accept":accept_val.value,
+                #rehacer la parte de surface roughness para agregar el acabado superficial
+                "rough":f"{acabado.value}, (≤{surface_val.value} {measure.value})",
+                "uti_sn":int(uti_sn.value.split()[1]),
+                "calibrations":[],
+                # "sn1": int(test_sn_table.rows[0].cells[2].content.value),
+                "d_cal":distance_dropdown.value,
+                "sens_block":sensitivity_dropdown.value,
+                "notch":notch_dropdown.value,
+                "rec_lvl":record_dropdown.value,
+                "ax_scanning":axial_x.value,
+                "circ_ax_scanning":circumferential_x.value,
+                "method":ins_method_dropdown.value,
+                "coupling":agent_dropdown.value,
+                "stage":stage_dropdown.value,
+                "remarks":textarea.value,
+                "insp_name":inspectors_list[0],
+                "ndt_act":ndt_act.value,
+                # "sens_meth1":test_sn_table.rows[0].cells[6].content.value,
+                # "ref_size1":(test_sn_table.rows[0].cells[7].content.controls[0].value + " " + test_sn_table.rows[0].cells[7].content.controls[1].value + test_sn_table.rows[0].cells[7].content.controls[1].suffix_text),
+                # "ref_level1": test_sn_table.rows[0].cells[8].content.value + " dB",
+                # "trans_cor1": test_sn_table.rows[0].cells[9].content.value + " dB",
+                # "scan_lev1": test_sn_table.rows[0].cells[10].content.value + " dB",
+                # "screen_range1": test_sn_table.rows[0].cells[11].content.value + '"',
+                # "scan_type1": test_sn_table.rows[0].cells[12].content.value
+            }
+        except IndexError:
+            print("Index Error in line 698, sn1")
 
         if check.value:
             data["acc_sn"] = sn.value
         else:
             data["rej_sn"] = sn.value
 
-        if test_sn2.value  != '':
-            try:
-                data["sn2"] = if_int(test_sn2.value.split())
-            except TypeError:
-                print("Type Error!!")
-                pass
-            except AttributeError:
-                print("No Value")
+        for i in test_sn_table.rows:
+            data["calibrations"].append(
+                {
+                    "sn":i.cells[2].content.value,
+                    "sens":i.cells[6].content.value, #formerly sens_meth
+                    "ref":(i.cells[7].content.controls[0].value + " " + i.cells[7].content.controls[1].value + i.cells[7].content.controls[1].suffix_text), #formerly ref_size
+                    "ref_l":i.cells[8].content.value + " dB", #formerly ref_level
+                    "cor":i.cells[9].content.value + " dB", #formerly trans_cor
+                    "scan":i.cells[10].content.value + " dB", #formerly scan_lev
+                    "screen":i.cells[11].content.value + '"', #formerly screen_range
+                    "scan_t":i.cells[12].content.value #formerly scan_type
+                }
+            )
 
-        if test_sn3.value != '':
-            try:
-                data["sn3"] = if_int(test_sn3.value.split())
-            except TypeError:
-                print("Type Error!!")
-                pass
-            except AttributeError:
-                print("No Value")
+        #changing from if to try except
 
-        if test_sn4.value != '':
-            try:
-                data["sn4"] = if_int(test_sn4.value.split())
-            except TypeError:
-                print("Type Error!!")
-                pass
-            except AttributeError:
-                print("No Value")
+        # # if test_sn2.value  != '':
+        # try:
+        #     data["sn2"] = if_int(test_sn_table.rows[1].cells[2].content.value)
+        # except TypeError:
+        #     print("Type Error!!")
+        # except AttributeError:
+        #     print("No Value")
+        # except IndexError:
+        #     print("no value in the second place of the rows array from test_sn_table")
 
-        if test_sn5.value != '':
-            try:
-                data["sn5"] = if_int(test_sn5.value.split())
-            except TypeError:
-                print("Type Error!!")
-                pass
-            except AttributeError:
-                print("No Value")
+        # # if test_sn3.value != '':
+        # try:
+        #     data["sn3"] = if_int(test_sn_table.rows[2].cells[2].content.value)
+        # except TypeError:
+        #     print("Type Error!!")
+        # except AttributeError:
+        #     print("No Value")
+        # except IndexError:
+        #     print("no value in the third place of the rows array from test_sn_table")
 
-        pdfurldownload = str(downloads_path) + "\\" + str(box_group.value) + "-R-" + str(year) + ".pdf"
+        # # if test_sn4.value != '':
+        # try:
+        #     data["sn4"] = if_int(test_sn_table.rows[3].cells[2].content.value)
+        # except TypeError:
+        #     print("Type Error!!")
+        # except AttributeError:
+        #     print("No Value")
+        # except IndexError:
+        #     print("no value in the fourth place of the rows array from test_sn_table")
+
+        # # if test_sn5.value != '':
+        # try:
+        #     data["sn5"] = if_int(test_sn_table.rows[4].cells[2].content.value)
+        # except TypeError:
+        #     print("Type Error!!")
+        # except AttributeError:
+        #     print("No Value")
+        # except IndexError:
+        #     print("no value in the fifth place of the rows array from test_sn_table")
+
+        print(requests.get(f"{api_url}Report_Number").text)
+
+        pdfurldownload = str(downloads_path) + "\\" + "Inspection_Report_" + str(box_group.value) + "-R-" + str(year) + "-" + requests.get(f"{api_url}Report_Number").text.replace('"', "") + ".pdf" #f"{downloads_path}\\Inspection Report {box_group.value}-R-{year}-{requests.get(f"{api_url}Report_Number")}.pdf"
+
+        print(pdfurldownload)
 
         async with async_playwright() as p:
             browser = await p.chromium.launch()
@@ -1035,6 +1070,7 @@ def main(page:ft.Page):
     )
 
     def scanning_list_maker():
+        #work in progress
         scanning_json = requests.get(f"{api_url}all_scannings")
         scanning_list = scanning_json.json()
 
@@ -1043,9 +1079,12 @@ def main(page:ft.Page):
         for scanning in scanning_list:
             scanning_list_parsed.append(str(scanning["scanning_direction"]))
 
-        circumferential_x.options = axial_x.options = list(map(ft.dropdown.Option, scanning_list_parsed))
+        circumferential_x.options = list(map(ft.dropdown.Option, scanning_list_parsed))
+        
+        axial_x.options = list(map(ft.dropdown.Option, scanning_list_parsed))
 
-        circumferential_x.value = axial_x.value = scanning_list_parsed[0]
+        circumferential_x.value = scanning_list_parsed[0]
+        axial_x.value = scanning_list_parsed[0]
 
     axial_x = ft.Dropdown(
         label="axial scanning", 
@@ -1367,7 +1406,7 @@ def main(page:ft.Page):
     #             test_sn5.visible = True
     #             test_calibration_container.height += 70
 
-    #         e.page.update()
+    #         page.update()
     #     elif textarea_counter > 5:
     #         textarea_counter = textarea_counter - 1
     #     elif textarea_counter < 1:
@@ -1405,7 +1444,7 @@ def main(page:ft.Page):
     #         else:
     #             test_calibration_container.height = 250
 
-    #         e.page.update()
+    #         page.update()
     #     elif textarea_counter < 1:
     #         textarea_counter = textarea_counter + 1
     #     elif textarea_counter > 5:
@@ -1415,12 +1454,12 @@ def main(page:ft.Page):
 
 
     # add_btn = ft.IconButton(
-    #     icon= ft.icons.ADD,
+    #     icon= ft.Icons.ADD,
     #     on_click=add_textarea
     # )
     
     # del_btn = ft.IconButton(
-    #     icon= ft.icons.REMOVE_ROUNDED,
+    #     icon= ft.Icons.REMOVE_ROUNDED,
     #     on_click=del_textarea
     # )
 
@@ -1449,24 +1488,173 @@ def main(page:ft.Page):
         page.update()
 
     test_sn_cell_del_btn = ft.IconButton(
-        icon=ft.icons.DELETE_FOREVER_ROUNDED,
+        icon=ft.Icons.DELETE_FOREVER_ROUNDED,
         on_click=del_row
     )
+
+    hole_list = ["FBH", "SDH"]
+    scan_list = ["OD", "Axial", "Radial"]
+
+    #https://ideone.com/ItifKv
+
+    def convert_to_float(frac_str):
+        try:
+            return float(frac_str)
+        except ValueError:
+            num, denom = frac_str.split('/')
+            try:
+                leading, num = num.split(' ')
+                whole = float(leading)
+            except ValueError:
+                whole = 0
+            frac = float(num) / float(denom)
+            return whole - frac if whole < 0 else whole + frac
+
+    def nvalF(e):
+
+        #this lets the string be in the fraction format (4/5) without any other character
+
+        for i in e.control.value:
+            print(i)
+            if (i in (string.digits + '/')) and e.control.value.count('/') <= 1:
+                print("Value within parameters")
+                e.control.suffix_text = f'" ({round(convert_to_float(e.control.value)*25.4, 2)} mm)'
+            else:
+                e.control.value = e.control.value[:-1]
+                print("Value not within parameters")
+
+        page.update()
 
     def test_sn_adder(e):
         sn = test_sn_dropdown.value
         if sn is not None:
             probe_sn_json = requests.get(f"{api_url}probes_by_sn", json={"sn" : sn})
             probe_sn = probe_sn_json.json()
-            test_sn_table.rows.append(ft.DataRow( cells=[ft.DataCell(ft.Text(f"{probe_sn["brand"]}")),ft.DataCell(ft.Text(f"{probe_sn["model"]}")),ft.DataCell(ft.Text(f"{probe_sn["sn"]}")),ft.DataCell(ft.Text(f"{probe_sn["freq"]}")),ft.DataCell(ft.Text(f"{probe_sn["size"]}")),ft.DataCell(ft.Text(f"{probe_sn["angle"]}"))]))
+            if len(test_sn_table.rows) < 5:
+                test_sn_table.rows.append(
+                    ft.DataRow(
+                        cells=
+                        [
+                            ft.DataCell(
+                                ft.Text(f"{probe_sn["brand"]}")
+                            ),
+                            ft.DataCell(
+                                ft.Text(f"{probe_sn["model"]}")
+                            ),
+                            ft.DataCell(
+                                ft.Text(f"{probe_sn["sn"]}")
+                            ),
+                            ft.DataCell(
+                                ft.Text(f"{probe_sn["freq"]}")
+                            ),
+                            ft.DataCell(
+                                ft.Text(f"{probe_sn["size"]}")
+                            ),
+                            ft.DataCell(
+                                ft.Text(f"{probe_sn["angle"]}")
+                            ),
+                            ft.DataCell(
+                                ft.Dropdown(
+                                    label="Sensitivity Method",
+                                    width=200,
+                                    bgcolor="white",
+                                    color="black",
+                                    options=list(map(ft.dropdown.Option, SM_list_parsed)),
+                                    value=SM_list_parsed[0]
+                                )
+                            ),
+                            ft.DataCell(
+                                ft.Row(
+                                    [
+                                        ft.Dropdown(
+                                            label="Hole",
+                                            width=80,
+                                            bgcolor="white",
+                                            color="black",
+                                            options=list(map(ft.dropdown.Option, hole_list)),
+                                            value=hole_list[0]
+                                        ),
+                                        ft.TextField(
+                                            label="Size",
+                                            width=200,
+                                            bgcolor="white",
+                                            color="black",
+                                            input_filter=ft.InputFilter(allow=True, regex_string=r'^(\d{1,2}(/(\d{1,2})?)?|/(\d{1,2})?)?$', replacement_string=""),
+                                            on_change=nvalF
+                                        )
+                                    ],
+                                    width=300
+                                ),  
+                            ),
+                            ft.DataCell(
+                                ft.TextField(
+                                    label="Reference Level",
+                                    width=100,
+                                    bgcolor="white",
+                                    color="black",
+                                    input_filter=ft.InputFilter(allow=True, regex_string=r"^(\d{1,2}(\.\d?)?|\.\d)?$", replacement_string=""),
+                                    suffix_text="dB"
+                                    # on_change=NFilter
+                                )
+                            ),
+                            ft.DataCell(
+                                ft.TextField(
+                                    label="Transfer Correction",
+                                    width=100,
+                                    bgcolor="white",
+                                    color="black",
+                                    input_filter=ft.InputFilter(allow=True, regex_string=r"^(\d{1,2}(\.\d?)?|\.\d)?$", replacement_string=""),
+                                    suffix_text="dB",
+                                    prefix_text="+"
+                                )
+                            ),
+                            ft.DataCell(
+                                ft.TextField(
+                                    label="Scanning Level",
+                                    width=100,
+                                    bgcolor="white",
+                                    color="black",
+                                    input_filter=ft.InputFilter(allow=True, regex_string=r"^(\d{1,2}(\.\d?)?|\.\d)?$", replacement_string=""),
+                                    suffix_text="dB",
+                                    prefix_text="+"
+                                )
+                            ),
+                            ft.DataCell(
+                                ft.TextField(
+                                    label="Screen Range",
+                                    width=100,
+                                    bgcolor="white",
+                                    color="black",
+                                    input_filter=ft.InputFilter(allow=True, regex_string=r"^(\d{1,2}(\.\d?)?|\.\d)?$", replacement_string=""),
+                                    suffix_text='"'
+                                )
+                            ),
+                            ft.DataCell(
+                                ft.Dropdown(
+                                    width=100,
+                                    bgcolor="white",
+                                    color="black",
+                                    options=list(map(ft.dropdown.Option, scan_list)),
+                                    value=scan_list[0]
+                                )
+                            ),
+                        ]
+                    )
+                )
             
 
         page.update()
 
-        print(test_sn_table.rows[-1].cells[0].content.value)
+        # print(test_sn_table.rows[-1].cells[0].content.value)
+        # print(test_sn_table.rows[-1].cells[2].content.value)
+        # print(test_sn_table.rows[0].cells[6].content.value)
+        # print(test_sn_table.rows[0].cells[7].content.controls[0].value)# Reference Size Hole
+        # print(test_sn_table.rows[0].cells[7].content.controls[1].value)# Reference Size Size
+        # print(test_sn_table.rows[0].cells[7].content.controls[1].suffix_text)# Reference Size Size Suffix Text
+        # print(len(test_sn_table.rows))
 
     test_sn_add_btn = ft.IconButton(
-        icon=ft.icons.ADD,
+        icon=ft.Icons.ADD,
         on_click=test_sn_adder
     )
 
@@ -1483,6 +1671,16 @@ def main(page:ft.Page):
         ],
         horizontal_alignment="center"
     )
+
+    def SM_list_maker():
+        SM_json = requests.get(f"{api_url}all_SM")
+        SM_list = SM_json.json()
+        SM_list_parsed = []
+        for SM in SM_list:
+            SM_list_parsed.append(f"{SM["method"]}")
+        return SM_list_parsed
+    
+    SM_list_parsed = SM_list_maker()
 
     test_sn_table = ft.DataTable(
         show_checkbox_column=True,
@@ -1504,12 +1702,33 @@ def main(page:ft.Page):
             ),
             ft.DataColumn(
                 ft.Text("Angle"),
+            ),
+            ft.DataColumn(
+                ft.Text("Sensitivity Method")
+            ),
+            ft.DataColumn(
+                ft.Text("Reference Size")
+            ),
+            ft.DataColumn(
+                ft.Text("Reference Level")
+            ),
+            ft.DataColumn(
+                ft.Text("Transfer Correction")
+            ),
+            ft.DataColumn(
+                ft.Text("Scanning Level")
+            ),
+            ft.DataColumn(
+                ft.Text("Screen Range")
+            ),
+            ft.DataColumn(
+                ft.Text("Scan Type")
             )
         ],
         rows=[
             # ft.DataRow(
             #     cells=[
-            #         ft.DataCell(ft.IconButton(icon=ft.icons.DELETE_FOREVER_ROUNDED)),
+            #         ft.DataCell(ft.IconButton(icon=ft.Icons.DELETE_FOREVER_ROUNDED)),
             #         ft.DataCell(ft.Text("OLYMPUS")),
             #         ft.DataCell(ft.Text("OLYMPUS")),
             #         ft.DataCell(ft.Text("OLYMPUS")),
@@ -1585,7 +1804,7 @@ def main(page:ft.Page):
         width=400,
         height=500,
         padding=ft.padding.only(top=10),
-        bgcolor=ft.colors.WHITE,
+        bgcolor=ft.Colors.WHITE,
         content=ft.Column(
             horizontal_alignment="center",
             controls=[
@@ -1614,6 +1833,10 @@ def main(page:ft.Page):
         )
     )
 
+    def jqty_c(e):
+        job_order.suffix_text = f"({e.control.value} pcs)"
+        page.update()
+
     job_qty_txtbox = ft.TextField(
         text_align="center",
         keyboard_type=ft.KeyboardType.NUMBER,
@@ -1623,7 +1846,9 @@ def main(page:ft.Page):
         border_radius=10,
         show_cursor=False,
         color="black",
-        input_filter=ft.NumbersOnlyInputFilter()
+        input_filter=ft.NumbersOnlyInputFilter(),
+        on_change=jqty_c,
+        suffix_text="Pieces"
     )
 
     def od_validation(e):
@@ -1656,9 +1881,17 @@ def main(page:ft.Page):
     def change_measure(e):
 
         if e.control.value == False:
+            od_txtbox.suffix_text = '"'
+            id_txtbox.suffix_text = '"'
+            thick_txtbox.suffix_text = '"'
+            height_txtbox.suffix_text = '"'
             inch_or_mm.label = "Inch"
             page.update()
         else:
+            od_txtbox.suffix_text = 'mm'
+            id_txtbox.suffix_text = 'mm'
+            thick_txtbox.suffix_text = 'mm'
+            height_txtbox.suffix_text = 'mm'
             inch_or_mm.label = "Milimeter"
             page.update()
 
@@ -1697,8 +1930,9 @@ def main(page:ft.Page):
         border_radius=10,
         show_cursor=False,
         color="black",
-        input_filter=ft.InputFilter(allow=True, regex_string=r"^\d*\.?\d*$", replacement_string=""),
-        on_change=od_validation
+        input_filter=ft.InputFilter(allow=True, regex_string=r"^(\d{1,2}(\.\d?)?|\.\d)?$", replacement_string=""),
+        on_change=od_validation,
+        suffix_text='"'
     )
 
     id_txtbox = ft.TextField(
@@ -1710,8 +1944,9 @@ def main(page:ft.Page):
         border_radius=10,
         show_cursor=False,
         color="black",
-        input_filter=ft.InputFilter(allow=True, regex_string=r"^\d*\.?\d*$", replacement_string=""),
-        on_change=id_validation
+        input_filter=ft.InputFilter(allow=True, regex_string=r"^(\d{1,2}(\.\d?)?|\.\d)?$", replacement_string=""),
+        on_change=id_validation,
+        suffix_text='"'
     )
 
     height_txtbox = ft.TextField(
@@ -1723,8 +1958,9 @@ def main(page:ft.Page):
         border_radius=10,
         show_cursor=False,
         color="black",
-        input_filter=ft.InputFilter(allow=True, regex_string=r"^\d*\.?\d*$", replacement_string=""),
-        on_change=height_validation
+        input_filter=ft.InputFilter(allow=True, regex_string=r"^(\d{1,2}(\.\d?)?|\.\d)?$", replacement_string=""),
+        on_change=height_validation,
+        suffix_text='"'
     )
 
     thick_txtbox = ft.TextField(
@@ -1736,8 +1972,9 @@ def main(page:ft.Page):
         border_radius=10,
         show_cursor=False,
         color="black",
-        input_filter=ft.InputFilter(allow=True, regex_string=r"^\d*\.?\d*$", replacement_string=""),
-        on_change=thick_validation
+        input_filter=ft.InputFilter(allow=True, regex_string=r"^(\d{1,2}(\.\d?)?|\.\d)?$", replacement_string=""),
+        on_change=thick_validation,
+        suffix_text='"'
     )
 
     def bar_change(e):
@@ -1749,13 +1986,13 @@ def main(page:ft.Page):
         if index == 2:
             e.page.go(f"/")
             user_mail = None 
-        e.page.update()
+        page.update()
 
     NAV = ft.NavigationBar(
         destinations=[
-            ft.NavigationBarDestination(icon=ft.icons.EDIT_NOTE, label="Reporte"),
-            ft.NavigationBarDestination(icon=ft.icons.ADMIN_PANEL_SETTINGS, label="Admin"),
-            ft.NavigationBarDestination(icon=ft.icons.EXIT_TO_APP_SHARP, label="Exit")
+            ft.NavigationBarDestination(icon=ft.Icons.EDIT_NOTE, label="Reporte"),
+            ft.NavigationBarDestination(icon=ft.Icons.ADMIN_PANEL_SETTINGS, label="Admin"),
+            ft.NavigationBarDestination(icon=ft.Icons.EXIT_TO_APP_SHARP, label="Exit")
         ],
         on_change=bar_change
     )
@@ -1845,7 +2082,7 @@ def main(page:ft.Page):
         page.views.append(
             ft.View(
                 "/",
-                bgcolor=ft.colors.BLUE_50,
+                bgcolor=ft.Colors.BLUE_50,
                 controls=[
                     ft.Container(
                         width=400,
@@ -1854,7 +2091,7 @@ def main(page:ft.Page):
                             alignment="center",
                             horizontal_alignment="center",
                             controls=[
-                                ft.Icon(name=ft.icons.PERSON, size=250, color="black"),
+                                ft.Icon(name=ft.Icons.PERSON, size=250, color="black"),
                                 ft.Container(
                                     content=ft.Column(
                                         alignment="center",
@@ -1872,7 +2109,7 @@ def main(page:ft.Page):
                                                 elevation=30,
                                                 width=200,
                                                 height=50,
-                                                bgcolor=ft.colors.PURPLE,
+                                                bgcolor=ft.Colors.PURPLE,
                                                 color="white",
                                                 on_click=lambda _:login_fun()
                                             ),
@@ -1904,7 +2141,7 @@ def main(page:ft.Page):
             page.views.append(
                 ft.View(
                     "/register",
-                    bgcolor=ft.colors.BLUE_50,
+                    bgcolor=ft.Colors.BLUE_50,
                     controls=[
                         ft.Container(
                             width=400,
@@ -1913,7 +2150,7 @@ def main(page:ft.Page):
                                 alignment="center",
                                 horizontal_alignment="center",
                                 controls=[
-                                    ft.Icon(name=ft.icons.PERSON, size=250, color="black"),
+                                    ft.Icon(name=ft.Icons.PERSON, size=250, color="black"),
                                     ft.Container(
                                         content=ft.Column(
                                             alignment="center",
@@ -1933,7 +2170,7 @@ def main(page:ft.Page):
                                                     elevation=30,
                                                     width=200,
                                                     height=50,
-                                                    bgcolor=ft.colors.PURPLE,
+                                                    bgcolor=ft.Colors.PURPLE,
                                                     color="white",
                                                     on_click=lambda _:register_fun()
                                                 ),
@@ -1968,14 +2205,14 @@ def main(page:ft.Page):
                     horizontal_alignment="center",
                     vertical_alignment="center",
                     padding=0,
-                    bgcolor=ft.colors.BLUE_50,
+                    bgcolor=ft.Colors.BLUE_50,
                     controls=[
                         NAV,
                         ft.SafeArea(
                             ft.Container(
                                 height=10,
                                 expand=True,
-                                bgcolor=ft.colors.PURPLE,
+                                bgcolor=ft.Colors.PURPLE,
                             ),
                         ),
                         ft.Column(
@@ -1984,7 +2221,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=300,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2004,7 +2241,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=names_width + 50,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2024,7 +2261,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=650,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2051,7 +2288,7 @@ def main(page:ft.Page):
                                 #     width=400,
                                 #     height=120,
                                 #     padding=ft.padding.only(top=10),
-                                #     bgcolor=ft.colors.WHITE,
+                                #     bgcolor=ft.Colors.WHITE,
                                 #     content=ft.Column(
                                 #         horizontal_alignment="center",
                                 #         controls=[
@@ -2064,7 +2301,7 @@ def main(page:ft.Page):
                                 #     width=400,
                                 #     height=120,
                                 #     padding=ft.padding.only(top=10),
-                                #     bgcolor=ft.colors.WHITE,
+                                #     bgcolor=ft.Colors.WHITE,
                                 #     content=ft.Column(
                                 #         horizontal_alignment="center",
                                 #         controls=[
@@ -2077,7 +2314,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=600,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2103,7 +2340,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=700,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         spacing=6,
                                         horizontal_alignment="center",
@@ -2155,7 +2392,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=120,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2168,7 +2405,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=120,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2181,7 +2418,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=120,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2197,7 +2434,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=315,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2213,7 +2450,7 @@ def main(page:ft.Page):
                                 #     width=400,
                                 #     height=test_sn_height + 40,
                                 #     padding=ft.padding.only(top=10),
-                                #     bgcolor=ft.colors.WHITE,
+                                #     bgcolor=ft.Colors.WHITE,
                                 #     content=ft.Column(
                                 #         horizontal_alignment="center",
                                 #         controls=[
@@ -2239,7 +2476,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=490,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2259,7 +2496,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=270,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2275,7 +2512,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=370,
                                     padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         controls=[
@@ -2293,7 +2530,7 @@ def main(page:ft.Page):
                                     width=400,
                                     height=750,
                                     #padding=ft.padding.only(top=10),
-                                    bgcolor=ft.colors.WHITE,
+                                    bgcolor=ft.Colors.WHITE,
                                     content=ft.Column(
                                         horizontal_alignment="center",
                                         alignment="center",
@@ -2324,7 +2561,7 @@ def main(page:ft.Page):
                                                 width=210,
                                                 height=60,
                                                 color="white",
-                                                bgcolor=ft.colors.PURPLE,
+                                                bgcolor=ft.Colors.PURPLE,
                                                 on_click= click
                                             )
                                         ]
@@ -2344,14 +2581,14 @@ def main(page:ft.Page):
                     horizontal_alignment="center",
                     vertical_alignment="center",
                     padding=0,
-                    bgcolor=ft.colors.BLUE_50,
+                    bgcolor=ft.Colors.BLUE_50,
                     controls=[
                         NAV,
                         ft.SafeArea(
                             ft.Container(
                                 height=10,
                                 expand=True,
-                                bgcolor=ft.colors.PURPLE,
+                                bgcolor=ft.Colors.PURPLE,
                             ),
                         ),
                         ft.Column(

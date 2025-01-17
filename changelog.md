@@ -187,16 +187,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed the way the test calibration setup is added
 
-29/11/2024
- 
-- Removed the delete button from the row and moved it to the side of the dropdown, it will delete the last element of the data table
-
 2/12/2024
 
 - Started debugging issue that causes the app to not load the dropdowns
+- Fixed bug that caused the app to not update the page
+- Limited the maximum amount of test serial numbers allowed to be on the table to 5
+- Now test_sn is grabbed from the table
+- Changed how data from Test Calibration Setup is grabbed from the database
+
+3/12/2024
+
+- Added a column in the test sn table for it to contain a dropdown with the sensitivity method
+- Added Api endpoint to send the Sensitivity Method data to the dropdown
+- Fixed issues with the former way of inserting Test calibration setup data into the template
+- Added a column in the test sn table that contains reference size info (Hole, and size) dropdown and text area
+- modified api to receive the reference size data
+
+4/12/2024
+
+- Modified the Report schema to handle the sensitivity method, ref size and level
+- Added text suffixes in job order and quantity
+- Added reference Level textarea to receive numerical data only
+- Modified API for it to be able to receive the ref level data
+- Added transfer correction text area
+- Modified schema for it to handle transfer correction
+- Modified API for it to handle transfer correction
+- Added scanning level text area
+- Modified schema for it to handle scanning level
+- Modified API for it to handle scanning level   
 
 ### REMOVED
 
 17/07/2024
 
 - Removed arrow controls for increasing and decreasing dimension values
+
+29/11/2024
+ 
+- Removed the delete button from the row and moved it to the side of the dropdown, it will delete the last element of the data table
