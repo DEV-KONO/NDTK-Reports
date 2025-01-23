@@ -64,9 +64,9 @@ def report_num(test: str):
     report_number = last_report_number[-1][0] + 1
     
     try:
-        return f"{test}-R-{year.strftime("%Y")}-{report_number:03}"
+        return f"{test}-R-{year.strftime('%Y')}-{report_number:03}"
     except IndexError:
-        return f"{test}-R-{year.strftime("%Y")}-1"
+        return f"{test}-R-{year.strftime('%Y')}-1"
         
 
 #Function that returns the data from the UT instrument DB
