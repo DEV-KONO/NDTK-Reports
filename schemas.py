@@ -24,6 +24,7 @@ class Schema_Acceptance(BaseModel):
 
 class Schema_NDE(BaseModel):
     nde_spec: str
+    client_name: str
     acceptance: Schema_Acceptance | None = None
 
 class Schema_Acabado(BaseModel):
