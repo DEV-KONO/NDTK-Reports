@@ -10,8 +10,6 @@ import os
 import requests
 import datetime
 
-from models import Sensitivity_Method
-
 year = datetime.datetime.now().year
 downloads_path = str(Path.home() / "Downloads")
 
@@ -22,10 +20,10 @@ plant_name_var = ""
 contact_name_var = ""
 #plant_loc = ""
 
-load_dotenv(".api.env")
+# load_dotenv(".api.env")
 
 def main(page:ft.Page):
-    api_url = os.getenv("api_url")
+    api_url = "https://ggg83g2k-80.usw3.devtunnels.ms/" #os.getenv("api_url")
 
     names_width = 0
 
@@ -246,6 +244,7 @@ def main(page:ft.Page):
     
     # in_name = reload_inspectors
 
+    print(f"{api_url}all_clients")
     clients_json = requests.get(f"{api_url}all_clients")
     clients_list = clients_json.json()
 

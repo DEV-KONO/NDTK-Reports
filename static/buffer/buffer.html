@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="http://127.0.0.1:8000/static/../static/styles/style.css">
+    <style>
+        
+.container {
+    display: flex;
+    justify-content: space-around;
+    border: 1px solid black;
+}
+div.container > div.title_section {
+    width: 33.33%;
+}
+.table {
+    flex-direction: column;
+    
+}
+.row {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    /* border: 1px solid black; */
+    flex-basis: content;
+}
+
+.data_table {
+    display: flex;
+    flex-direction: column;
+}
+
+.data_row:last-child{
+    border-bottom: none;
+    /* border: 5px solid slateblue; */
+}
+
+.data_row {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: space-between;
+    /* border-top: 1px solid black; */
+    border-bottom: 1px solid black;
+    flex-wrap: wrap;
+    /* align-content: center; */
+    align-items: center;
+    vertical-align: middle;
+    /* align-items: stretch; */
+}
+
+div.data_row > span {
+    align-self: stretch;
+    /* height: 60px; */
+    /* padding-top: 20px;
+    padding-bottom: 20px; */
+}
+
+.data_cell{
+    box-sizing: border-box;
+    border-left: 1px solid black;
+    border-right: 1px solid black;
+    align-self: stretch;
+}
+
+.data_cell:last-child {
+    border-right: none;
+}
+
+
+.bold_column_name {
+    font-weight: 700;
+    font-size: 12px;
+    border-right: 1px solid black;
+    /* border-left: 1px solid black; */
+    background-color: #c4c3c7;
+    align-items: center;
+    justify-content: center;
+    padding-left: 4.37px;
+    padding-right: 4.37px;
+}
+
+.column_name_row {
+    justify-content: space-evenly;
+    align-content: stretch;
+}
+
+.bold_column_name:last-child {
+    border-right: none; 
+}
+
+.two_items {
+    width: 50%;
+    border: none;
+}
+
+.three_items { 
+    width: 33.33%;
+}
+
+.four_items { 
+    width: 25%;
+}
+
+.five_items {
+    width: 20%;
+    border-left: none;
+    border-right: 1px solid black;
+}
+
+.six_items {
+    width: 16.66%;
+}
+
+._13_items {
+    width: 7.6925%;
+    font-size: 9px;
+}
+
+.image {
+    flex-shrink: 1;
+    width: 100%;
+    height: 100%;
+}
+
+.table_title {
+    height: 30px;
+    display: flex;
+    align-items: center;
+    font-weight: 700;
+    font-size: 18px;
+    background: #d1d1d1;
+    border-top: none;
+    border-bottom: none;
+}
+
+.table_subtitle {
+    font-size: 15px;
+    font-weight: 600;
+    background: #607fee;
+    border: none;
+}
+
+.bold_cell {
+    font-weight: 700;
+    font-size: 15px;
+    border-right: 0px solid black;
+    border-left: 0px solid black;
+}
+
+.title {
+    color: #3d0cc4;
+    font-weight: 700;
+    font-size: 20px;
+}
+
+.title_section{
+    display: flex;
+    align-items: center;
+}
+
+div.row > span {
+    border-right: 1px solid black;
+    width: 97.9px;
+    font-size: 10px;
+    padding-top: 19.2445px;
+    padding-bottom: 20.2445px;
+}
+
+.row#no_border {
+    border: none;
+}
+
+.separator {
+    height: 20px;
+}
+
+.bold_cell.two_items {
+    border-right: 1px solid black;
+}
+
+.setup_table {
+    height: 35px;
+}
+
+/* Set A4 size */
+*   {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    /* Set content to fill the entire A4 page */
+    html,
+    body {
+        width: 210mm;
+        height: 297mm;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Style content with shaded background */
+    .content {
+        width: 100%;
+        /* Adjust the width as needed */
+        height: 80%;
+        /* Adjust the height as needed*/
+        padding: 20px;
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+        /* background-color: #f0f0f0; */
+        /* Light gray shade */
+    }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="container">
+                <div class="title_section">
+                    <img class="image" src="..\static\images\ndtklogo.png" alt="ndtklogo">
+                </div>
+                <div class="title_section">
+                    <span class="title">
+                        UT Inspection Summary
+                    </span>
+                </div>
+                <div class="container table title_section" style="align-items: stretch; border-right: none; border-top: none; border-bottom: none;">
+                    <div class="row" style="border-bottom: 1px solid black;">
+                        <span style="border: none;">Report Number: </span><span style="border-right: none;">UT-R-2024-12345</span>
+                    </div>
+                    <div class="row">
+                        <span style="border: none;">Date: </span><span style="border-right: none;">Friday 19 2024</span>
+                    </div>
+                </div>
+        </div>
+        
+        <div class="separator"></div>
+
+        <div class="container table_title" style="border-top: 1px solid black;">
+            <span>Datos del cliente/Customer Information</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell two_items">
+                    <span class="">Nombre del Cliente/Customer Name</span>
+                </div>
+                <div class="data_cell two_items">
+                    <span class="">liebherr</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items">
+                    <span class="">Planta/Plant</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span class="">garcia</span>
+                </div>
+                <div class="data_cell bold_cell four_items">
+                    <span class="">Persona De Contacto/Contact Name</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span class="">luis gerardo</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container table_title">
+            <span>Datos de la Pieza/Part Information</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell two_items">
+                    <span>Descripci�n de la Pieza/Part Description</span>
+                </div>
+                <div class="data_cell two_items">
+                    test part desc
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items">
+                    <span>Tipo de material/Material Spec</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>test material</span>
+                </div>
+                <div class="data_cell bold_cell four_items">
+                    <span>Colada/Heat</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>test heat</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items">
+                    <span>Orden de trabajo cliente/Job Order</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>test job order</span>
+                </div>
+                <div class="data_cell bold_cell four_items">
+                    <span>Cantidad/Job QTY</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>test job quantity</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container table_title">
+            <span>Dimensiones/Dimensions</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items">
+                    <span>OD</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>22.4</span>
+                </div>
+                <div class="data_cell bold_cell four_items">
+                    <span>ID</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>19.4</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items">
+                    <span>Thickness</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>22.4</span>
+                </div>
+                <div class="data_cell bold_cell four_items">
+                    <span>Height</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>33.4</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items">
+                    <span>Especificaciones PND/ NDE Specifications</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>Test nde spec</span>
+                </div>
+                <div class="data_cell bold_cell four_items">
+                    <span>Criterio de Aceptaci�n/ Acceptance Criteria</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>test criteria</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell two_items">
+                    <span>Acabado Superficial/ Surface Roughtness</span>
+                </div>
+                <div class="data_cell two_items">
+                    <span>test roughness</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container table_title">
+            <span>Equipo de ultrasonido/UT Instrument</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell six_items">
+                    <span>Marca/ Brand</span>
+                </div>
+        <div class="data_cell six_items">
+                    <span>General Electric</span>
+                </div>
+                <div class="data_cell bold_cell six_items" style="border-right: 1px solid black;">
+                    <span>Modelo/ Model</span>
+                </div>
+                <div class="data_cell six_items" style="border-left: none;">
+                    <span>GX0893CE</span>
+                </div>
+                <div class="data_cell bold_cell six_items">
+                    <span>N� de Serie/ Serial N�</span>
+                </div>
+                <div class="data_cell six_items">
+                    <span>289703</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items">
+                    <span>Fecha de Calibraci�n/ Calibration Date</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>2024-02-14</span>
+                </div>
+                <div class="data_cell bold_cell four_items">
+                    <span>Prox. Calibraci�n/ Calibration Due Date</span>
+                </div>
+                <div class="data_cell four_items">
+                    <span>2024-10-14</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container table_title" style="border-top: 1px solid black;">
+            <span>Calibraci�n del instrumento/ Test Calibration Setup</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell table_subtitle two_items">
+                    <span>Trasductor/Probe Data</span>
+                </div>
+                <div class="data_cell bold_cell table_subtitle two_items" style="border-right: none;">
+                    <span>Calibraci�n de Sensibilidad/Sensitivity Calibration</span>
+                </div>
+            </div>
+        </div>
+        <div class="container data_table">
+            <div class="data_row column_name_row">
+                <div class="data_cell bold_column_name _13_items">
+                    <span>marca brand</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>modelo model</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>N� de Serie Serial N�</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Frec. Freq.</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Tama�o Size</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Angulo Refracted Angle</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Sensibilidad Sensitivity Method</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Referencia Reference Size</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Nivel de referencia Ref. Level</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Transfer. Transfer Correction</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Escaneo Scanning Level</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Rango Screen Range</span>
+                </div>
+                <div class="data_cell bold_column_name _13_items">
+                    <span>Tipo Escaneo Scan Type</span>
+                </div>
+            </div>
+            <div class="data_row setup_table">
+                <div class="data_cell _13_items"><span>HP</span></div>
+                <div class="data_cell _13_items"><span>Victus</span></div>
+                <div class="data_cell _13_items"><span>3</span></div>
+                <div class="data_cell _13_items"><span>144</span></div>
+                <div class="data_cell _13_items"><span>50 x 30</span></div>
+                <div class="data_cell _13_items"><span>180�</span></div>
+                <div class="data_cell _13_items"><span>2ms</span></div>
+                <div class="data_cell _13_items"><span>ref size</span></div>
+                <div class="data_cell _13_items"><span>lvl ref</span></div>
+                <div class="data_cell _13_items"><span>asd</span></div>
+                <div class="data_cell _13_items"><span>ads</span></div>
+                <div class="data_cell _13_items"><span>asd</span></div>
+                <div class="data_cell _13_items"><span>ssd</span></div>
+            </div>
+            <div class="data_row setup_table">
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+            </div>
+            <div class="data_row setup_table">
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+            </div>
+            <div class="data_row setup_table">
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+            </div>
+            <div class="data_row setup_table">
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+                <div class="data_cell _13_items"><span></span></div>
+            </div>
+            
+        </div>
+
+        <div class="separator"></div>
+        <div class="separator"></div>
+        <div class="separator"></div>
+        <div class="separator"></div>
+        <div class="separator"></div>
+        <div class="separator"></div>
+        <div class="separator"></div>
+        <div class="separator"></div>
+        <div class="separator"></div>
+        <div class="separator"></div>
+
+        <div class="container table_title" style="border-top: 1px solid black;">
+            <span>Bloques de calibraci�n / Calibration Blocks</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items" style="font-size: 12px;">
+                    <span>Calibraci�n de Distancia/Distance Calibration Verificacion del Haz Angular/Angle Verification</span>
+                </div>
+                <div class="data_cell four_items" style="font-size: 10px;">
+                    <span>test d calibration</span>
+                </div>
+                <div class="data_cell bold_cell four_items" style="font-size: 12px;">
+                    <span>Bloque de Sensibilidad Sensitivity Block</span>
+                </div>
+                <div class="data_cell four_items" style="font-size: 10px;">
+                    <span>test sens block</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell two_items" style="font-size: 12px;">
+                    <span>PROF. DE LA MUESCA / NOTCH DEPTH</span>
+                </div>
+                <div class="data_cell two_items" style="font-size: 12px;">
+                    <span>test notch</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell two_items" style="font-size: 12px;">
+                    <span>NIVEL DE REGISTRO / RECORDING LEVEL</span>
+                </div>
+                <div class="data_cell two_items" style="font-size: 12px;">
+                    <span>test rec lvl</span>
+                </div>
+            </div>
+            <div class="container table_title">
+                <span>DIRECCION DE ESCANEO / SCANNIG DIRECTION </span>
+            </div>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items">
+                    <span>Axial Scanning</span>
+                </div>
+                <div class="data_cell four_items" style="font-size: 13px;">
+                    <span style="font-weight: 700;">Face - </span><span>test ax scanning</span>
+                </div>
+                <div class="data_cell bold_cell four_items">
+                    <span>Circunferencia/ Axial Scanning</span>
+                </div>
+                <div class="data_cell four_items" style="font-size: 12px;">
+                    <span style="font-weight: 700;">OD - </span><span>test circ ax scanning</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container table_title">
+            <span>INFORMACION DE LA INSPECCION / INSPECTION INFORMATION</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell four_items"><span>METODO DE INSPECCION / INSPECTION METHOD</span></div>
+                <div class="data_cell four_items"><span>test method</span></div>
+                <div class="data_cell bold_cell four_items"><span>ACOPLANTE / COUPLING AGENT</span></div>
+                <div class="data_cell four_items"><span>test coupling</span></div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell two_items"><span>ETAPA DE INSPECCI�N / INSPECTION STAGE</span></div>
+                <div class="data_cell two_items"><span>test stage</span></div>
+            </div>
+        </div>
+
+        <div class="container table_title">
+            <span>RESULTADOS DE LA INSPECCION / INSPECTION RESULTS</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell" style="width: 33.33%;"><span>RESULTADO DE LA INSPECCION / INSPECTION RESULTS</span></div>
+                <div class="data_cell" style="width: 66.66%; border-left: none;">
+                    <div class="container data_table" style="border: none;">
+                        <div class="data_row" style="border-left: none;">
+                            <div class="data_cell three_items"><span>Aceptado/ Accepted</span></div>
+                            <div class="data_cell bold_cell three_items"><span>N� de Serie/ SN</span></div>
+                            <div class="data_cell three_items"><span>55226688</span></div>
+                        </div>
+                        <div class="data_row" style="border-left: none;">
+                            <div class="data_cell three_items"><span>Rechazado/ Rejected</span></div>
+                            <div class="data_cell bold_cell three_items"><span>N� de Serie/ SN</span></div>
+                            <div class="data_cell three_items"><span></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell bold_cell" style="width: 33.33%;">
+                    <span>Observaciones / Remarks</span>
+                </div>
+                <div class="data_cell" style="width: 66.66%; display: flex; justify-content: flex-start;">
+                    <span>test remarks</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="container table_title">
+            <span>Certificaci�n del personal / Personnel Certification</span>
+        </div>
+        <div class="container data_table">
+            <div class="data_row">
+                <div class="data_cell bold_cell five_items" style="border-right: 1px solid black; font-size: 10px;">
+                    <span>NOMBRE DEL INSPECTOR INSPECTOR NAME</span>
+                </div>
+                <div class="data_cell bold_cell five_items" style="border-right: 1px solid black; font-size: 10px;">
+                    <span>NIVEL DE CERTIFICACION CERTIFICATION LEVEL</span>
+                </div>
+                <div class="data_cell bold_cell five_items" style="border-right: 1px solid black; font-size: 10px;">
+                    <span>ACTIVIDAD NDT ACTIVITY</span>
+                </div>
+                <div class="data_cell bold_cell five_items" style="border-right: 1px solid black; font-size: 10px;">
+                    <span>FECHA DE VENCIMIENTO CERTIFICATION DUE DATE</span>
+                </div>
+                <div class="data_cell bold_cell five_items" style="font-size: 10px;">
+                    <span>FIRMA DEL INSPECTOR INSPECTOR SIGNATURE</span>
+                </div>
+            </div>
+            <div class="data_row">
+                <div class="data_cell five_items">
+                    <span>Samuel Kono Peralta</span>
+                </div>
+                <div class="data_cell five_items">
+                    <span>NDT UT Level I</span>
+                </div>
+                <div class="data_cell five_items">
+                    <span>revision etc</span>
+                </div>
+                <div class="data_cell five_items">
+                    <span>2028-12-28</span>
+                </div>
+                <div class="data_cell five_items">
+                    <span><img src="" alt="Firma"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
