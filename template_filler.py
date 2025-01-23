@@ -35,7 +35,7 @@ templates = Jinja2Templates(directory="plantillas")
 # html_template = r"PRUT.html"
 # template = template_env.get_template(html_template)
 
-config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
+# config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
 
 load_dotenv()
 
