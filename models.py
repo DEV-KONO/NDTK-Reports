@@ -9,7 +9,7 @@ load_dotenv()
 
 DB_PASS = os.getenv("DB_PASS")
 
-postgres_url = "postgresql://root:yfWhkVsscKSCV50EtUztP6CPSVGSwPsF@dpg-cu97vid2ng1s73f13nf0-a/ndtk_reports" % quote(DB_PASS)
+postgres_url = "postgresql://root:yfWhkVsscKSCV50EtUztP6CPSVGSwPsF@dpg-cu97vid2ng1s73f13nf0-a/ndtk_reports:yfWhkVsscKSCV50EtUztP6CPSVGSwPsF" #% quote(DB_PASS)
 
 engine = create_engine(postgres_url)
 
