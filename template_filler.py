@@ -193,12 +193,12 @@ async def add_ins(schemainspector: Schema_Inspector):
 
         return { 
             "error" : False, 
-            "msg" : f"Inspector {inspector["name"]} added correctly"
+            "msg" : f"Inspector {inspector['name']} added correctly"
             }
     else:
         return {
             "error" : True,
-            "msg" : f"Inspector {inspector["name"]} already exists"
+            "msg" : f"Inspector {inspector['name']} already exists"
         }
 
 @app.get("/validate_admin")
