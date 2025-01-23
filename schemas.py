@@ -4,6 +4,14 @@ from pydantic import BaseModel
 class Schema_ClientBase(BaseModel):
     name: str
 
+class Schema_Probe(BaseModel):
+    sn: int
+    brand: str
+    model: str
+    freq: str
+    size: str
+    angle: str
+
 class Schema_Plants(Schema_ClientBase):
     client_name: str
 

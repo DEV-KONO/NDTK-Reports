@@ -94,6 +94,18 @@ def ret_cert_due(inspector, test):
 def val_ins_fun(inspector: str):
     return session.query(Inspector).filter_by(name=inspector).one_or_none()
 
+@app.post("/add_probe")
+async def add_probe(probe: Schema_Probe):
+    model_probe = probe.model_dump()
+
+    new_probe = Probe(sn=model_probe["sn"], brand=model_probe["brand"], model=model_probe["model"], freq=model_probe["freq"], size=model_probe["size"], angle=model_probe["angle"])
+    session.add(new_probe)
+
+    session.commit()
+
+    return {"msg": f"Probe SN:{model_probe["sn"]} was submitted correctly to DB"}
+
+
 @app.get("/all_inspection_info")
 async def inspection_info():
     method = session.query(Method).all()

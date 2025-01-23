@@ -23,7 +23,7 @@ contact_name_var = ""
 # load_dotenv(".api.env")
 
 def main(page:ft.Page):
-    api_url = "https://ggg83g2k-80.usw3.devtunnels.ms/" #os.getenv("api_url")
+    api_url = "https://ndtk-reports.onrender.com/" #os.getenv("api_url")
 
     names_width = 0
 
