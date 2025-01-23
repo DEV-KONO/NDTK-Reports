@@ -9,7 +9,7 @@ load_dotenv()
 
 DB_PASS = os.getenv("DB_PASS")
 
-postgres_url = "postgresql+psycopg2://postgres:%s@localhost:5432/ndtk_reports_test" % quote(DB_PASS)
+postgres_url = "postgresql://root:yfWhkVsscKSCV50EtUztP6CPSVGSwPsF@dpg-cu97vid2ng1s73f13nf0-a/ndtk_reports" % quote(DB_PASS)
 
 engine = create_engine(postgres_url)
 
