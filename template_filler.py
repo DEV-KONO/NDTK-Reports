@@ -103,7 +103,7 @@ async def add_probe(probe: Schema_Probe):
 
     session.commit()
 
-    return {"msg": f"Probe SN:{model_probe["sn"]} was submitted correctly to DB"}
+    return {"msg": f"Probe SN:{model_probe['sn']} was submitted correctly to DB"}
 
 
 @app.get("/all_inspection_info")
