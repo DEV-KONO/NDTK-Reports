@@ -363,17 +363,16 @@ async def add_acc_criteria(acceptance: Schema_Acceptance):
 async def add_nde(nde: Schema_NDE):
     model_nde = nde.model_dump()
     nde_spec = model_nde["nde_spec"]
-    client_name = model_nde["client_name"]
 
     new_nde = NDE(nde_spec=nde_spec)
 
-    client = session.query(Clients).filter_by(name=client_name).one_or_none()
-    client.nde.append(new_nde)
+    # client = session.query(Clients).filter_by(name=client_name).one_or_none()
+    # client.nde.append(new_nde)
     session.add(new_nde)
 
     session.commit()
 
-    return {"msg": f"nde spec:{nde_spec} was submitted correctly to client: {client_name}"}
+    return {"msg": f"nde spec:{nde_spec} was submitted correctly to NDE Table"}
 
 @app.post("/add_acabado")
 async def add_nde(acabado: Schema_Acabado):
