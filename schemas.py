@@ -19,12 +19,10 @@ class Schema_Contacts(Schema_ClientBase):
     client_name: str
 
 class Schema_Acceptance(BaseModel):
-    id: int
     acceptance_criteria: str
     nde_id: int
 
 class Schema_NDE(BaseModel):
-    id: int
     nde_spec: str
 
 class Schema_Acabado(BaseModel):
