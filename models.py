@@ -51,7 +51,7 @@ class Contacts(BaseModel):
 class Acceptance(Base):
     __tablename__ = "Acceptance Criteria"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     acceptance_criteria = Column(String, nullable=False)
     nde_id = Column(ForeignKey("NDE Specification.id"))
     nde = relationship("NDE", back_populates="acceptance")
@@ -59,7 +59,7 @@ class Acceptance(Base):
 class NDE(Base):
     __tablename__ = "NDE Specification"
 
-    id = Column(Integer, primary_key=True, nullable=False)
+    id = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
     nde_spec = Column(String, nullable=False)
     acceptance = relationship(Acceptance)
 
