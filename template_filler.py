@@ -375,7 +375,7 @@ async def add_nde(nde: Schema_NDE):
     return {"msg": f"nde spec:{nde_spec} was submitted correctly to NDE Table"}
 
 @app.post("/add_acabado")
-async def add_nde(acabado: Schema_Acabado):
+async def add_acabado(acabado: Schema_Acabado):
     model_acabado = acabado.model_dump()
     acabado_superficial = model_acabado["acabado"]
 
