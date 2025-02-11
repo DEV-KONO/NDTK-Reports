@@ -353,7 +353,7 @@ async def add_UT(UTI: Schema_UTI):
 
     session.commit()
 
-    return {"msg" : f"{model_UTI["model"]} with sn {model_UTI['sn']} has been succesfully uploaded to the database"}
+    return {"msg" : f"{model_UTI['model']} with sn {model_UTI['sn']} has been succesfully uploaded to the database"}
 
 @app.post("/add_criteria")
 async def add_acc_criteria(acceptance: Schema_Acceptance):
