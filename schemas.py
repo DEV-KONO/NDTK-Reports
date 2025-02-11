@@ -20,7 +20,8 @@ class Schema_Contacts(Schema_ClientBase):
 
 class Schema_Acceptance(BaseModel):
     acceptance_criteria: str
-    nde_id: int
+    nde_spec: str
+    # nde_id: int | None
 
 class Schema_NDE(BaseModel):
     nde_spec: str
