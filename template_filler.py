@@ -346,7 +346,7 @@ async def register(schemaregister: Schema_Register):
 @app.post("/add_criteria")
 async def add_acc_criteria(acceptance: Schema_Acceptance):
     model_acc = acceptance.model_dump()
-    acceptance_criteria = model_acc["acceptance"]
+    acceptance_criteria = model_acc["acceptance_criteria"]
     nde_spec = model_acc["nde_spec"]
 
     new_acc_crit = Acceptance(acceptance_criteria=acceptance_criteria)
@@ -377,7 +377,7 @@ async def add_nde(nde: Schema_NDE):
 @app.post("/add_crit")
 async def add_crit(acceptance: Schema_Acceptance):
     model_acceptance = acceptance.model_dump()
-    acceptance_crit = model_acceptance["acceptance"]
+    acceptance_crit = model_acceptance["acceptance_criteria"]
     nde_id = model_acceptance["nde_id"]
 
     new_acceptance = Acceptance(acceptance_criteria=acceptance_crit, nde_id=nde_id)
