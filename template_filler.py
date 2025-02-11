@@ -374,6 +374,22 @@ async def add_nde(nde: Schema_NDE):
 
     return {"msg": f"nde spec:{nde_spec} was submitted correctly to NDE Table"}
 
+@app.post("/add_crit")
+async def add_crit(acceptance: Schema_Acceptance):
+    model_acceptance = acceptance.model_dump()
+    acceptance_crit = model_acceptance["acceptance"]
+    nde_id = model_acceptance["nde_id"]
+
+    new_acceptance = Acceptance(acceptance_criteria=acceptance_crit, nde_id=nde_id)
+
+    # client = session.query(Clients).filter_by(name=client_name).one_or_none()
+    # client.nde.append(new_nde)
+    session.add(new_acceptance)
+
+    session.commit()
+
+    return {"msg": f"Acceptance Criteria:{acceptance_crit} was submitted correctly to NDE Table"}
+
 @app.post("/add_acabado")
 async def add_acabado(acabado: Schema_Acabado):
     model_acabado = acabado.model_dump()
