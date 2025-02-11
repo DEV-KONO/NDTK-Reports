@@ -343,6 +343,18 @@ async def register(schemaregister: Schema_Register):
     except Exception:
         traceback.print_exc()
 
+@app.post("/add_ut_instrument")
+async def add_UT(UTI: Schema_UTI):
+    model_UTI = UTI.model_dump()
+    
+    new_UTI = Instrument(model_UTI["sn"], model_UTI["brand"], model_UTI["model"], model_UTI["calibration_date"], model_UTI["calibration_due_date"])
+
+    session.add(new_UTI)
+
+    session.commit()
+
+    return {"msg" : f"{model_UTI["model"]} with sn {model_UTI['sn']} has been succesfully uploaded to the database"}
+
 @app.post("/add_criteria")
 async def add_acc_criteria(acceptance: Schema_Acceptance):
     model_acc = acceptance.model_dump()
