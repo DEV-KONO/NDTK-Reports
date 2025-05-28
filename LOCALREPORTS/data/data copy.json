@@ -1,0 +1,182 @@
+{
+    "Tables": [
+        {
+            "Name": "NDE Specification",
+            "Data": [
+                {
+                    "id": 1,
+                    "nde_spec": "QSA 010-2 Section 4.4",
+                    "acceptance_criteria": [
+                        {
+                            "id": 1,
+                            "crit": "QSA 010-2, Code letter C, quality class 6"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "Name": "clientes",
+            "Data": [
+                {
+                    "id" : 1,
+                    "name" : "Liebher",
+                    "plantas" : [
+                        "Garcia",
+                        "Santa Catarina",
+                        "Morelos"
+                    ],
+                    "contactos" : [
+                        "Brian Lowe",
+                        "Jose Luis Rodriguez"
+                    ]
+                }
+            ]
+        },
+        {
+            "Name": "ut_instruments",
+            "Data": [
+                {
+                    "sn": "289703",
+                    "brand": "General Electric",
+                    "model": "GX0893CE",
+                    "calibration_date": "2024-02-14",
+                    "calibration_due_date": "2024-10-14"
+                }
+            ]
+        },
+        {
+            "Name": "Probe Data",
+            "Data": [
+                {
+                    "sn": "27936485",
+                    "brand": "Olympus",
+                    "model": "DL4R-3.5x410",
+                    "freq": "4.0 Mhz",
+                    "size": "3.5x10 mm",
+                    "angle": 0
+                },
+                {
+                    "sn": "71963936",
+                    "brand": "HP",
+                    "model": "HP Smart Tank 790",
+                    "freq": "29 Ghz",
+                    "size": "50 x 20 cm",
+                    "angle": 0
+                }
+            ]
+        },
+        {
+            "Name": "Sensitivity Method",
+            "Data": [
+                {
+                    "id": 1,
+                    "method": "DAC"
+                },
+                {
+                    "id": 2,
+                    "method": "DCC"
+                },
+                {
+                    "id": 3,
+                    "method": "DBC"
+                }
+            ]
+        },
+        {
+            "Name": "Inspectores",
+            "Data": [
+                {
+                    "Name": "Samuel Kono Peralta",
+                    "VT": null,
+                    "VT_due": null,
+                    "PT": null,
+                    "PT_due": null,
+                    "UT": "NDT UT Level I",
+                    "UT_due": "2028-12-28",
+                    "ET": null,
+                    "ET_due": null,
+                    "MT": null,
+                    "MT_due": null
+                }
+            ]
+        },
+        {
+            "Name": "Distance Calibration",
+            "Data": [
+                {
+                    "id": 1,
+                    "distance": "IIW Type 1"
+                }
+            ]
+        },
+        {
+            "Name": "Sensitivity Block",
+            "Data": [
+                {
+                    "id": 1,
+                    "sensitivity": "ASTM Flat Bottomed Hole FBH 5/64 (2MM)"
+                }
+            ]
+        },
+        {
+            "Name": "Notch Depth",
+            "Data": [
+                {
+                    "id": 1,
+                    "notch_depth": "N/A"
+                }
+            ]
+        },
+        {
+            "Name": "Acabado Superficial",
+            "Data": [
+                {
+                    "id": 1,
+                    "acabado": "Prueba"
+                }
+            ]
+        },
+        {
+            "Name": "Recording Level",
+            "Data": [
+                {
+                    "id": 1,
+                    "recording_level": "Per EN-10228-3 Class 6, DAC @2 mm FBH. Referenced on document QSA 010-2"
+                }
+            ]
+        },
+        {
+            "Name": "Scanning Direction",
+            "Data": [
+                {
+                    "id": 1,
+                    "scanning_direction": "CW & CCW"
+                }
+            ]
+        },
+        {
+            "Name": "Inspection Info",
+            "Data": {
+                "method": [
+                    {
+                        "id": 1,
+                        "ins_method": "Contacto / Contact"
+                    }
+                ],
+                "agent": [
+                    {
+                        "id": 1,
+                        "coupling_agent": "Gel"
+                    }
+                ],
+                "stage": [
+                    {
+                        "id": 1,
+                        "ins_stage": "After Machining (Before Drilling)"
+                    }
+                ]
+            }
+        }
+    ]
+}

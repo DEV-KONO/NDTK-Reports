@@ -1,21 +1,30 @@
-MIT License
+Licencia de Uso Interno – NDTK Consulting
 
-Copyright (c) 2024 DEV-KONO
+Nombre del software: NDTK Reports
+Versión: 1.0
+Fecha: 26/05/2025
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Alcance de la Licencia
+Este software ha sido desarrollado exclusivamente para el uso interno de NDTK Consulting. Queda estrictamente prohibido su uso, reproducción, distribución o modificación por parte de terceros ajenos a la organización sin autorización expresa por escrito del desarrollador.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Uso Autorizado
+Se autoriza a NDTK Consulting a instalar, ejecutar y utilizar este software únicamente en equipos de cómputo propiedad o bajo control directo de la empresa. Su uso está limitado a los fines operativos internos para los cuales fue diseñado.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Restricciones
+
+No se permite la redistribución, comercialización ni sublicenciamiento del software.
+
+No se permite su publicación en internet, plataformas públicas o privadas de descarga, o redes de intercambio.
+
+No se permite su ingeniería inversa, descompilación o alteración del código fuente sin el consentimiento del desarrollador.
+
+Propiedad Intelectual
+El software, incluyendo su código fuente, documentación y cualquier componente asociado, es propiedad intelectual del desarrollador y se entrega bajo licencia limitada de uso, no como una transferencia de propiedad.
+
+Vigencia
+La presente licencia tiene validez indefinida mientras se cumplan las condiciones aquí establecidas. Cualquier incumplimiento puede derivar en la revocación inmediata del derecho de uso.
+
+Firmado por:
+Samuel Kono Peralta
+kono.devjourney@gmail.com
+26 de Mayo de 2025
