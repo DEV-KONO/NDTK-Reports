@@ -1,5 +1,6 @@
 import os
 import string
+from unittest import TestLoader
 from flet import*
 from pathlib import Path
 import jinja2
@@ -58,28 +59,47 @@ def main(page:ft.Page):
         )
     )
 
-    def json_searcher(jsonlist: list, table: str, param: str = "", search_param: str = "", search: str = ""):
-        for json in jsonlist["Tables"]:
-            if json["Name"] == table:
-                if param:
-                    for entry in json["Data"]:
-                        try:
-                            return entry[f"{param}"]
-                        except:
-                            print("Json Searcher Error: Parameter not found")
-                elif bool(search_param) and bool(search):
-                    for entry in json["Data"]:
-                        if entry[f"{search_param}"] == search:
-                            try:
-                                return entry
-                            except:
-                                print("Json Searcher Error: Parameter not found")
-                        else:
-                            print("Json Searcher Error: Term not found")
-                elif bool(search_param) != bool(search):
-                    print("Json Searcher Error: The function need both search and search param to be filled with the property to be searched and the data to be found.")
-                else:
-                    return json["Data"]
+    def json_searcher(json: json, table: str, param: str = "", search_param: str = "", search: str = ""):
+        
+        if param:
+            for entry in json[f"{table}"]:
+                try:
+                    return entry[f"{param}"]
+                except:
+                    print("Json Searcher Error: Parameter not found")
+        elif bool(search_param) and bool(search):
+            for entry in json[f"{table}"]:
+                try:
+                    return entry[f"{search_param}"]
+                except:
+                    print("Json Searcher Error: Parameter not found")
+        elif bool(search_param) != bool(search):
+            print("Json Searcher Error: The function need both search and search param to be filled with the property to be searched and the data to be found.")
+        else:
+            return json[f"{table}"]
+
+
+        # for json in json["Tables"]:
+        #     if json["Name"] == table:
+        #         if param:
+        #             for entry in json["Data"]:
+        #                 try:
+        #                     return entry[f"{param}"]
+        #                 except:
+        #                     print("Json Searcher Error: Parameter not found")
+        #         elif bool(search_param) and bool(search):
+        #             for entry in json["Data"]:
+        #                 if entry[f"{search_param}"] == search:
+        #                     try:
+        #                         return entry
+        #                     except:
+        #                         print("Json Searcher Error: Parameter not found")
+        #                 else:
+        #                     print("Json Searcher Error: Term not found")
+        #         elif bool(search_param) != bool(search):
+        #             print("Json Searcher Error: The function need both search and search param to be filled with the property to be searched and the data to be found.")
+        #         else:
+        #             return json["Data"]
 
     def nde_option_maker():
         # nde_json = requests.get(f"{api_url}all_nde")
@@ -211,7 +231,7 @@ def main(page:ft.Page):
 
     with open(r"./data/data.json", "r") as file:
             clients_list = json.load(file)
-            clients_list = json_searcher(jsonlist=clients_list, table="clientes")
+            clients_list = json_searcher(json=clients_list, table="clientes")
 
     clients_list_parsed = []
 
@@ -383,8 +403,6 @@ def main(page:ft.Page):
         visible=False
     )
 
-    #TODO añadir un boton para cada "OTRO" para que pueda agregar plantas y contactos a la base de datos
-
     def plant_change(e):
         # print(e.control.value)
         if e.control.value == "Otro":
@@ -410,7 +428,6 @@ def main(page:ft.Page):
             }
 
             # add_plant_request = requests.post(url=f"{api_url}add_plant/", json=plant_data)
-            #TODO Add plant
 
             plant_name.value = other_plant_name.value
 
@@ -538,7 +555,6 @@ def main(page:ft.Page):
 
     warning_text =  ft.Text(visible=False)
 
-    #TODO hacer funciones para enviar nuevo cliente, planta y contacto respectvamente
     def send_all(e):
         # print(other_client_name.value + other_contact_name.value + other_plant_name.value)
         if other_client_name.value and other_contact_name.value and other_plant_name.value:
@@ -929,7 +945,7 @@ def main(page:ft.Page):
 
         with open(r"data\data.json", "r") as file:
             uti_dict = json.load(file)
-            uti_dict = json_searcher(jsonlist=uti_dict, table="ut_instruments", search_param="sn", search=sn)
+            uti_dict = json_searcher(json=uti_dict, table="ut_instruments", search_param="sn", search=sn)
 
         print(uti_dict)
 
@@ -1162,9 +1178,10 @@ def main(page:ft.Page):
 
         with open(r"data\data.json", "r") as file:
             test_list = json.load(file)
-            for i in test_list["Tables"]:
-                if i["Name"] == "Probe Data":
-                    test_list = i["Data"]
+            test_list = test_list["Probe Data"]
+            # for i in test_list["Tables"]:
+            #     if i["Name"] == "Probe Data":
+            #         test_list = i["Data"]
 
         test_list_parsed = []
         for test in test_list:
@@ -1232,7 +1249,7 @@ def main(page:ft.Page):
 
             with open(r"data\data.json", "r") as file:
                 probe_sn = json.load(file)
-                probe_sn = json_searcher(jsonlist=probe_sn, table="Probe Data", search_param="sn", search=sn)
+                probe_sn = json_searcher(json=probe_sn, table="Probe Data", search_param="sn", search=sn)
 
             if len(test_sn_table.rows) < 5:
                 test_sn_table.rows.append(
@@ -1374,9 +1391,10 @@ def main(page:ft.Page):
 
         with open(r"data\data.json", "r") as file:
             SM_list = json.load(file)
-            for i in SM_list["Tables"]:
-                if i["Name"] == "Sensitivity Method":
-                    SM_list = i["Data"]
+            SM_list = SM_list["Sensitivity Method"]
+            # for i in SM_list["Tables"]:
+            #     if i["Name"] == "Sensitivity Method":
+            #         SM_list = i["Data"]
 
         SM_list_parsed = []
         for SM in SM_list:

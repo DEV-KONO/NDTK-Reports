@@ -409,8 +409,6 @@ def main(page:ft.Page):
         visible=False
     )
 
-    #TODO añadir un boton para cada "OTRO" para que pueda agregar plantas y contactos a la base de datos
-
     def plant_change(e):
         # print(e.control.value)
         if e.control.value == "Otro":
@@ -605,7 +603,6 @@ def main(page:ft.Page):
     #     ]
     # )
 
-    #TODO hacer funciones para enviar nuevo cliente, planta y contacto respectvamente
     def send_all(e):
         # print(other_client_name.value + other_contact_name.value + other_plant_name.value)
         if other_client_name.value and other_contact_name.value and other_plant_name.value:
