@@ -706,7 +706,19 @@ def main(page:ft.Page):
         else:
             data["parameters"]["rej_sn"] = sn.value
 
-        uti_by_sn = json_searcher(db_json, "ut_instruments", search_param="sn", search=str(uti_sn.value.split()[1]))
+        # uti_by_sn = json_searcher(db_json, "ut_instruments", search_param="sn", search=str(uti_sn.value.split()[1]))
+
+        with open(r"data\data.json", "r") as file:
+            uti_by_sn = json.load(file)
+
+            uti_by_sn = uti_by_sn["ut_instruments"]
+
+            for uti in uti_by_sn:
+                if uti["sn"] == sn:
+                    uti_by_sn = dict(uti)
+                    break
+            uti_by_sn = uti_by_sn[0]
+            print(uti_by_sn)
 
         data["parameters"]["uti_brand"] = uti_by_sn["brand"]
 
@@ -716,9 +728,19 @@ def main(page:ft.Page):
 
         data["parameters"]["cal_due"] = uti_by_sn["calibration_due_date"]
 
-        data["parameters"]["cert_lvl"] = json_searcher(db_json, "Inspectores", search_param="Name", search=inspectors_list[0])[f"{box_group.value}"]
+        with open(r"data\data.json", "r") as file:
+            inspectores = json.load(file)
 
-        data["parameters"]["cert_due"] = json_searcher(db_json, "Inspectores", search_param="Name", search=inspectors_list[0])[f"{box_group.value}_due"]
+            inspectores = inspectores["Inspectores"]
+
+            for inspector in inspectores:
+                if inspector["Name"] == inspectors_list[0]:
+                    
+                    data["parameters"]["cert_lvl"] = inspector[f"{box_group.value}"]
+
+                    data["parameters"]["cert_due"] = inspector[f"{box_group.value}_due"]
+                    
+                    break
 
         for i in test_sn_table.rows:
             data["parameters"]["calibrations"].append(
@@ -945,7 +967,15 @@ def main(page:ft.Page):
 
         with open(r"data\data.json", "r") as file:
             uti_dict = json.load(file)
-            uti_dict = json_searcher(json=uti_dict, table="ut_instruments", search_param="sn", search=sn)
+
+            uti_dict = uti_dict["ut_instruments"]
+
+            for uti in uti_dict:
+                if uti["sn"] == sn:
+                    uti_dict = uti
+                    break
+
+            # uti_dict = json_searcher(json=uti_dict, table="ut_instruments", search_param="sn", search=sn)
 
         print(uti_dict)
 
@@ -975,11 +1005,12 @@ def main(page:ft.Page):
         # distance_list = distance_json.json()
         # print(distance_list)
 
+        distance_list = []
+
         with open(r"data\data.json", "r") as file:
-            distance_list = json.load(file)
-            for i in distance_list["Tables"]:
-                if i["Name"] == "Distance Calibration":
-                    distance_list = i["Data"]
+            distancejson = json.load(file)
+            for i in distancejson["Distance Calibration"]:
+                distance_list.append(i)
 
         distance_list_parsed = []
 
@@ -1002,9 +1033,9 @@ def main(page:ft.Page):
 
         with open(r"data\data.json", "r") as file:
             sens_list = json.load(file)
-            for i in sens_list["Tables"]:
-                if i["Name"] == "Sensitivity Block":
-                    sens_list = i["Data"]
+            sens_list = sens_list["Sensitivity Block"]
+            # for i in sens_list["Sensitivity Block"]:
+            #     sens_list.append(i)
 
         sens_list_parsed = []
 
@@ -1027,9 +1058,12 @@ def main(page:ft.Page):
 
         with open(r"data\data.json", "r") as file:
             notch_list = json.load(file)
-            for i in notch_list["Tables"]:
-                if i["Name"] == "Notch Depth":
-                    notch_list = i["Data"]
+
+            notch_list = notch_list["Notch Depth"]
+
+            # for i in notch_list["Tables"]:
+            #     if i["Name"] == "Notch Depth":
+            #         notch_list = i["Data"]
 
         notch_list_parsed = []
 
@@ -1249,7 +1283,17 @@ def main(page:ft.Page):
 
             with open(r"data\data.json", "r") as file:
                 probe_sn = json.load(file)
-                probe_sn = json_searcher(json=probe_sn, table="Probe Data", search_param="sn", search=sn)
+
+                probe_sn = probe_sn["Probe Data"]
+
+            for probe in probe_sn:
+                if probe["sn"] == sn:
+                    probe_sn = probe
+                    break
+
+            # with open(r"data\data.json", "r") as file:
+            #     probe_sn = json.load(file)
+            #     probe_sn = json_searcher(json=probe_sn, table="Probe Data", search_param="sn", search=sn)
 
             if len(test_sn_table.rows) < 5:
                 test_sn_table.rows.append(
